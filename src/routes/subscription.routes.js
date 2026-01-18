@@ -154,7 +154,7 @@ router.put('/subscriptions/:fk_store_id/reactivate', async (req, res) => {
 router.put('/subscriptions/:fk_store_id/change-card', async (req, res) => {
 	try {
 		const { fk_store_id } = req.params
-		const { card_token_id } = req.body
+		const { card_token_id, last_four_digits } = req.body
 
 		if (!card_token_id) {
 			return res.status(400).json({ error: 'card_token_id é obrigatório' })
@@ -182,6 +182,11 @@ router.put('/subscriptions/:fk_store_id/change-card', async (req, res) => {
 				},
 			}
 		)
+
+		await turso.execute(`UPDATE stores SET last_four_digits = ? WHERE id = ?`, [
+			last_four_digits,
+			fk_store_id,
+		])
 
 		res.json({
 			success: true,
