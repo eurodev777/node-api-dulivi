@@ -8,7 +8,7 @@ const turso = getTursoClient()
 
 router.post('/subscriptions/subscribe', async (req, res) => {
 	try {
-		const { fk_store_id, plan_slug, payer_email, card_token_id } = req.body
+		const { fk_store_id, plan_slug, payer_email, card_token_id, last_four_digits } = req.body
 		// 1️⃣ Buscar plano
 		const plan = await turso.execute(`SELECT mp_plan_id, price FROM plans WHERE slug = ?`, [plan_slug])
 
@@ -43,9 +43,9 @@ router.post('/subscriptions/subscribe', async (req, res) => {
 		// 3️⃣ Salvar assinatura
 		await turso.execute(
 			`UPDATE stores 
-       SET subscription_id = ?, subscription_status = ?, plan = ?
+       SET subscription_id = ?, subscription_status = ?, plan = ?, last_four_digits = ?
        WHERE id = ?`,
-			[response.data.id, response.data.status, plan_slug, fk_store_id]
+			[response.data.id, response.data.status, plan_slug, last_four_digits, fk_store_id]
 		)
 
 		res.json(response.data)

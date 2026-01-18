@@ -48,7 +48,7 @@ router.get('/auth/mercadopago/callback', async (req, res) => {
 			user_id,
 			expires_in,
 		})
-		// return res.redirect(`https://painel-dulivi.netlify.app/integracoes/mercadopago/sucesso`)
+		return res.redirect(`https://painel-dulivi.netlify.app/conta`)
 	} catch (err) {
 		console.error(err.response?.data || err)
 		return res.status(500).json({
