@@ -9,44 +9,69 @@ const turso = getTursoClient()
 router.post('/subscriptions/subscribe', async (req, res) => {
 	try {
 		const { fk_store_id, plan_slug, payer_email, card_token_id, last_four_digits } = req.body
+		// 0️⃣ Buscar store
+		const storeRes = await turso.execute(`SELECT first_subscription_at FROM stores WHERE id = ?`, [fk_store_id])
+
+		if (!storeRes.rows.length) {
+			return res.status(404).json({ error: 'Loja não encontrada' })
+		}
+
+		const store = storeRes.rows[0]
+		const isFirstSubscription = !store.first_subscription_at
 		// 1️⃣ Buscar plano
 		const plan = await turso.execute(`SELECT mp_plan_id, price FROM plans WHERE slug = ?`, [plan_slug])
 
 		if (!plan.rows.length) {
 			return res.status(400).json({ error: 'Plano inválido' })
 		}
-		// 2️⃣ Criar assinatura COM TOKEN DA PLATAFORMA
+		// 2️⃣ Config auto_recurring
+		const autoRecurring = {
+			transaction_amount: plan.rows[0].price,
+			currency_id: 'BRL',
+		}
+
+		if (isFirstSubscription) {
+			autoRecurring.free_trial = {
+				frequency: 15,
+				frequency_type: 'days',
+			}
+		}
+		// 3️⃣ Criar assinatura
 		const response = await axios.post(
 			'https://api.mercadopago.com/preapproval',
 			{
 				preapproval_plan_id: plan.rows[0].mp_plan_id,
-				payer_email: payer_email,
-				card_token_id: card_token_id,
-				status: 'authorized',
+				payer_email,
+				card_token_id,
 				external_reference: `store_${fk_store_id}`,
-				auto_recurring: {
-					transaction_amount: plan.rows[0].price,
-					currency_id: 'BRL',
-					free_trial: {
-						frequency: 15,
-						frequency_type: 'days',
-					},
-				},
+				auto_recurring: autoRecurring,
 			},
 			{
 				headers: {
 					Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
 					'Content-Type': 'application/json',
 				},
-			}
+			},
 		)
-		// 3️⃣ Salvar assinatura
-		await turso.execute(
-			`UPDATE stores 
-       SET subscription_id = ?, subscription_status = ?, plan = ?, last_four_digits = ?
-       WHERE id = ?`,
-			[response.data.id, response.data.status, plan_slug, last_four_digits, fk_store_id]
-		)
+		// 4️⃣ Atualizar store
+		const updateFields = [response.data.id, response.data.status, plan_slug, last_four_digits, fk_store_id]
+
+		let updateQuery = `
+      UPDATE stores
+      SET subscription_id = ?,
+          subscription_status = ?,
+          plan = ?,
+          last_four_digits = ?
+    `
+		// ⚠️ Marcar primeira assinatura apenas uma vez
+		if (isFirstSubscription) {
+			updateQuery += `, first_subscription_at = ?`
+			updateFields.splice(4, 0, new Date())
+		}
+
+		updateQuery += ` WHERE id = ?`
+
+		await turso.execute(updateQuery, updateFields)
 
 		res.json(response.data)
 	} catch (err) {
@@ -61,7 +86,7 @@ router.get('/subscriptions/:fk_store_id', async (req, res) => {
 		const result = await turso.execute(
 			`SELECT subscription_id, subscription_status, plan 
        FROM stores WHERE id = ?`,
-			[fk_store_id]
+			[fk_store_id],
 		)
 
 		if (!result.rows.length || !result.rows[0].subscription_id) {
@@ -90,7 +115,7 @@ router.put('/subscriptions/:fk_store_id/pause', async (req, res) => {
 		const result = await turso.execute(
 			`SELECT subscription_id, subscription_status, plan 
        FROM stores WHERE id = ?`,
-			[fk_store_id]
+			[fk_store_id],
 		)
 		if (!result.rows.length || !result.rows[0].subscription_id) {
 			return res.status(404).json({ error: 'Assinatura não encontrada' })
@@ -105,7 +130,7 @@ router.put('/subscriptions/:fk_store_id/pause', async (req, res) => {
 					Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
 					'Content-Type': 'application/json',
 				},
-			}
+			},
 		)
 
 		await turso.execute(`UPDATE stores SET subscription_status = 'paused' WHERE subscription_id = ?`, [
@@ -124,7 +149,7 @@ router.put('/subscriptions/:fk_store_id/reactivate', async (req, res) => {
 		const result = await turso.execute(
 			`SELECT subscription_id, subscription_status, plan 
        FROM stores WHERE id = ?`,
-			[fk_store_id]
+			[fk_store_id],
 		)
 		if (!result.rows.length || !result.rows[0].subscription_id) {
 			return res.status(404).json({ error: 'Assinatura não encontrada' })
@@ -139,7 +164,7 @@ router.put('/subscriptions/:fk_store_id/reactivate', async (req, res) => {
 					Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
 					'Content-Type': 'application/json',
 				},
-			}
+			},
 		)
 
 		await turso.execute(`UPDATE stores SET subscription_status = 'authorized' WHERE subscription_id = ?`, [
@@ -163,7 +188,7 @@ router.put('/subscriptions/:fk_store_id/change-card', async (req, res) => {
 		const store = await turso.execute(
 			`SELECT subscription_id, subscription_status, plan 
        FROM stores WHERE id = ?`,
-			[fk_store_id]
+			[fk_store_id],
 		)
 		if (!store.rows.length || !store.rows[0].subscription_id) {
 			return res.status(404).json({ error: 'Assinatura não encontrada' })
@@ -180,13 +205,10 @@ router.put('/subscriptions/:fk_store_id/change-card', async (req, res) => {
 					Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
 					'Content-Type': 'application/json',
 				},
-			}
+			},
 		)
 
-		await turso.execute(`UPDATE stores SET last_four_digits = ? WHERE id = ?`, [
-			last_four_digits,
-			fk_store_id,
-		])
+		await turso.execute(`UPDATE stores SET last_four_digits = ? WHERE id = ?`, [last_four_digits, fk_store_id])
 
 		res.json({
 			success: true,
@@ -204,7 +226,7 @@ router.put('/subscriptions/:fk_store_id/cancel', async (req, res) => {
 		const store = await turso.execute(
 			`SELECT subscription_id, subscription_status, plan 
        FROM stores WHERE id = ?`,
-			[fk_store_id]
+			[fk_store_id],
 		)
 		if (!store.rows.length || !store.rows[0].subscription_id) {
 			return res.status(404).json({ error: 'Assinatura não encontrada' })
@@ -219,7 +241,7 @@ router.put('/subscriptions/:fk_store_id/cancel', async (req, res) => {
 					Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
 					'Content-Type': 'application/json',
 				},
-			}
+			},
 		)
 
 		// Atualiza seu banco
@@ -268,7 +290,7 @@ router.put('/subscriptions/:fk_store_id/change-plan', async (req, res) => {
 					Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
 					'Content-Type': 'application/json',
 				},
-			}
+			},
 		)
 
 		// 4️⃣ Atualizar banco
@@ -276,7 +298,7 @@ router.put('/subscriptions/:fk_store_id/change-plan', async (req, res) => {
 			`UPDATE stores 
        SET plan = ?, subscription_status = ?
        WHERE id = ?`,
-			[new_plan_slug, response.data.status, fk_store_id]
+			[new_plan_slug, response.data.status, fk_store_id],
 		)
 
 		return res.json({
