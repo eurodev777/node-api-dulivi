@@ -19,32 +19,39 @@ router.post('/subscriptions/subscribe', async (req, res) => {
 		const store = storeRes.rows[0]
 		const isFirstSubscription = !store.first_subscription_at
 		// 1️⃣ Buscar plano
-		const plan = await turso.execute(`SELECT mp_plan_id, price FROM plans WHERE slug = ?`, [plan_slug])
+		const planRes = await turso.execute(`SELECT mp_plan_id, price FROM plans WHERE slug = ?`, [plan_slug])
 
-		if (!plan.rows.length) {
+		if (!planRes.rows.length) {
 			return res.status(400).json({ error: 'Plano inválido' })
 		}
-		// 2️⃣ Config auto_recurring
-		const autoRecurring = {
-			transaction_amount: plan.rows[0].price,
-			currency_id: 'BRL',
-		}
+
+		const plan = planRes.rows[0]
+		// 🔹 Se for primeira assinatura, calcula data de início do trial
+		let trialStartDate = null
+		let startDateMP = null
+		const TRIAL_DAYS = 15
 
 		if (isFirstSubscription) {
-			autoRecurring.free_trial = {
-				frequency: 15,
-				frequency_type: 'days',
-			}
+			trialStartDate = new Date() // hoje
+			const nextPaymentDate = new Date(trialStartDate)
+			nextPaymentDate.setDate(nextPaymentDate.getDate() + TRIAL_DAYS) // +15 dias
+
+			startDateMP = nextPaymentDate.toISOString() // data que vai para o Mercado Pago
 		}
-		// 3️⃣ Criar assinatura
+		// 3️⃣ Criar assinatura no Mercado Pago
 		const response = await axios.post(
 			'https://api.mercadopago.com/preapproval',
 			{
-				preapproval_plan_id: plan.rows[0].mp_plan_id,
+				preapproval_plan_id: plan.mp_plan_id,
 				payer_email,
 				card_token_id,
 				external_reference: `store_${fk_store_id}`,
-				auto_recurring: autoRecurring,
+				auto_recurring: {
+					transaction_amount: plan.price,
+					currency_id: 'BRL',
+					// se for primeira assinatura, definimos start_date para após o trial
+					...(startDateMP ? { start_date: startDateMP } : {}),
+				},
 			},
 			{
 				headers: {
@@ -54,19 +61,18 @@ router.post('/subscriptions/subscribe', async (req, res) => {
 			},
 		)
 		// 4️⃣ Atualizar store
-		const updateFields = [response.data.id, response.data.status, plan_slug, last_four_digits, fk_store_id]
+		const updateFields = [response.data.id, plan_slug, last_four_digits, fk_store_id]
 
 		let updateQuery = `
       UPDATE stores
       SET subscription_id = ?,
-          subscription_status = ?,
           plan = ?,
           last_four_digits = ?
     `
 		// ⚠️ Marcar primeira assinatura apenas uma vez
 		if (isFirstSubscription) {
 			updateQuery += `, first_subscription_at = ?`
-			updateFields.splice(4, 0, new Date())
+			updateFields.splice(4, 0, trialStartDate)
 		}
 
 		updateQuery += ` WHERE id = ?`
