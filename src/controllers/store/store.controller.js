@@ -163,6 +163,69 @@ class StoreController {
 			})
 		}
 	}
+	// Buscar loja por slug (público)
+	async getPublicBySlug(req, res) {
+		const { slug } = req.params
+
+		try {
+			// 1️⃣ Buscar loja
+			const store = await storeRepository.getBySlug(slug)
+
+			if (!store) {
+				return res.status(404).json({
+					success: false,
+					error: 'STORE_NOT_FOUND',
+				})
+			}
+
+			// 2️⃣ Validar config Mercado Pago
+			if (!store.subscription_id) {
+				return res.status(403).json({
+					success: false,
+					error: 'STORE_INACTIVE',
+				})
+			}
+
+			// 3️⃣ Validar assinatura no Mercado Pago
+			try {
+				const response = await axios.get(`https://api.mercadopago.com/preapproval/${store.subscription_id}`, {
+					headers: {
+						Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+					},
+				})
+
+				if (response.data.status !== 'authorized') {
+					return res.status(403).json({
+						success: false,
+						error: 'STORE_INACTIVE',
+					})
+				}
+			} catch {
+				return res.status(403).json({
+					success: false,
+					error: 'STORE_INACTIVE',
+				})
+			}
+
+			// ✅ OK — retornar apenas dados públicos
+			res.json({
+				success: true,
+				data: {
+					id: store.id,
+					name: store.name,
+					slug: store.slug,
+					image: store.image,
+					is_open: true,
+				},
+			})
+		} catch (err) {
+			console.error(err)
+			res.status(500).json({
+				success: false,
+				error: 'INTERNAL_ERROR',
+			})
+		}
+	}
 }
 
 export default new StoreController()

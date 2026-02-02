@@ -47,7 +47,8 @@ router.post('/subscriptions/subscribe', async (req, res) => {
 				card_token_id,
 				external_reference: `store_${fk_store_id}`,
 				auto_recurring: {
-					transaction_amount: plan.price,
+					transaction_amount: 1,
+					// transaction_amount: plan.price,
 					currency_id: 'BRL',
 					// se for primeira assinatura, definimos start_date para após o trial
 					...(startDateMP ? { start_date: startDateMP } : {}),
@@ -61,18 +62,19 @@ router.post('/subscriptions/subscribe', async (req, res) => {
 			},
 		)
 		// 4️⃣ Atualizar store
-		const updateFields = [response.data.id, plan_slug, last_four_digits, fk_store_id]
+		const updateFields = isFirstSubscription
+			? [response.data.id, plan_slug, last_four_digits, trialStartDate, fk_store_id]
+			: [response.data.id, plan_slug, last_four_digits, fk_store_id]
 
 		let updateQuery = `
-      UPDATE stores
-      SET subscription_id = ?,
-          plan = ?,
-          last_four_digits = ?
-    `
-		// ⚠️ Marcar primeira assinatura apenas uma vez
+  UPDATE stores
+  SET subscription_id = ?,
+      plan = ?,
+      last_four_digits = ?
+`
+
 		if (isFirstSubscription) {
 			updateQuery += `, first_subscription_at = ?`
-			updateFields.splice(4, 0, trialStartDate)
 		}
 
 		updateQuery += ` WHERE id = ?`

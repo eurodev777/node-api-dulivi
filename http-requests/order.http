@@ -50,6 +50,25 @@ Content-Type: application/json
 ### Buscar pedido por ID
 GET {{baseUrl}}/order/?id=31
 Content-Type: application/json
+### Resolver carrinho
+POST {{baseUrl}}/order/resolve
+Content-Type: application/json
+
+{
+  "fk_store_id": 2,
+  "items": [
+    {
+      "fk_product_id": 1,
+      "quantity": 2,
+      "complements": [
+        {
+          "fk_complement_id": 1,
+          "quantity": 1
+        }
+      ]
+    }
+  ]
+}
 ### Atualizar um pedido
 PUT {{baseUrl}}/order/update
 Content-Type: application/json

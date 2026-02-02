@@ -9,5 +9,6 @@ router.get('/api/order/all', authToken, orderController.getAll)
 router.get('/api/order/:id', orderController.getById)
 router.put('/api/order/update/:id', authToken, orderController.update)
 router.delete('/api/order/delete/:id', authToken, orderController.delete)
+router.post('/api/order/resolve', orderController.resolve)
 
 export default router

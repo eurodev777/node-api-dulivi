@@ -26,12 +26,15 @@ export const calculateTotalOrderValue = async ({ items, fk_store_delivery_area_i
 	}
 	// Calcular frete
 	let shipping = 0
-	const hasDeliveryArea = typeof fk_store_delivery_area_id === 'number' && fk_store_delivery_area_id > 0
 
-	if (hasDeliveryArea) {
-		const area = await deliveryAreaRepository.getById(fk_store_delivery_area_id)
-		shipping = area ? Number(area.delivery_fee) : 0
-		if (!area) {
+	const deliveryAreaId = Number(fk_store_delivery_area_id)
+
+	if (deliveryAreaId > 0) {
+		const area = await deliveryAreaRepository.getById(deliveryAreaId)
+
+		if (area) {
+			shipping = Number(area.delivery_fee)
+		} else {
 			const store = await storeRepository.getById(fk_store_id)
 			shipping = store ? Number(store.default_delivery_fee) : 0
 		}
@@ -41,6 +44,7 @@ export const calculateTotalOrderValue = async ({ items, fk_store_delivery_area_i
 	}
 
 	shipping = round(shipping)
+	// total
 	const total = round(subtotal + shipping)
 
 	return {

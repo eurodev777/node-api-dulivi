@@ -136,7 +136,7 @@ class OrderController {
 						status: order.status,
 						created_at: order.created_at,
 					}
-				})
+				}),
 			)
 
 			res.status(200).json({
@@ -192,7 +192,7 @@ class OrderController {
 								price: comp?.price || 0,
 								quantity: c.quantity,
 							}
-						})
+						}),
 					)
 
 					return {
@@ -201,7 +201,7 @@ class OrderController {
 						quantity: item.quantity,
 						complements: formattedComplements,
 					}
-				})
+				}),
 			)
 
 			const serialized_order = {
@@ -311,6 +311,8 @@ class OrderController {
 			fk_store_id,
 			items = [],
 		} = data
+		const deliveryAreaId = parseValidId(fk_store_delivery_area_id)
+		const isPaidRequest = paid === true || paid === 'true' || paid === 1 || paid === '1'
 
 		try {
 			// Validar preço total do pedido
@@ -363,8 +365,8 @@ class OrderController {
 				status,
 				mercadopago_pay_id,
 				adjusted: totalAdjusted ? 'true' : 'false',
-				created_at,
-				fk_store_delivery_area_id,
+				created_at: created_at || new Date(),
+				fk_store_delivery_area_id: deliveryAreaId,
 				fk_delivery_address_id,
 				fk_user_id,
 				fk_store_id,
@@ -409,6 +411,62 @@ class OrderController {
 		} catch (error) {
 			console.error('Erro ao criar pedido a partir da sessão:', error)
 			throw new Error('Erro ao criar pedido a partir da sessão')
+		}
+	}
+	async resolve(req, res) {
+		const { fk_store_id, items } = req.body
+
+		if (!items || !items.length) {
+			return res.status(400).json({ success: false, error: 'Carrinho vazio' })
+		}
+
+		try {
+			const resolvedItems = await Promise.all(
+				items.map(async (item) => {
+					const product = await productRepository.getById(item.fk_product_id)
+					if (!product) return null
+
+					const complements = await Promise.all(
+						(item.complements || []).map(async (c) => {
+							const comp = await complementRepository.getById(c.fk_complement_id)
+							if (!comp) return null
+
+							return {
+								id: comp.id,
+								title: comp.title,
+								price: comp.price,
+								quantity: c.quantity,
+								subtotal: comp.price * c.quantity,
+							}
+						}),
+					)
+
+					const complementsTotal = complements.reduce((a, c) => a + c.subtotal, 0)
+
+					return {
+						id: product.id,
+						title: product.title,
+						price: product.price,
+						quantity: item.quantity,
+						subtotal: product.price * item.quantity,
+						complements,
+						total: product.price * item.quantity + complementsTotal,
+					}
+				}),
+			)
+
+			const total = resolvedItems.reduce((a, i) => a + i.total, 0)
+
+			res.json({
+				success: true,
+				data: {
+					items: resolvedItems,
+					total,
+				},
+			})
+		} catch (err) {
+			console.error(err)
+			res.status(500).json({ success: false, error: 'Erro ao resolver carrinho' })
 		}
 	}
 }

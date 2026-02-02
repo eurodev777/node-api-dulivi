@@ -19,6 +19,8 @@ Content-Type: application/json
 }
 ### Buscar loja por ID
 GET {{baseUrl}}/store/1
+### Buscar loja por slug
+GET {{baseUrl}}/store/public/nabih-esfihas
 ### Buscar token
 GET {{baseUrl}}/store/token/2
 ### Atualizar um loja

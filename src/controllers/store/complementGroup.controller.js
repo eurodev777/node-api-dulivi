@@ -19,9 +19,7 @@ class ComplementGroupController {
 		const exists = await checkIfExists(complement_groups, 'title', title)
 
 		if (exists) {
-			return res
-				.status(409)
-				.json({ success: false, error: 'Registro com este título já existe.' })
+			return res.status(409).json({ success: false, error: 'Registro com este título já existe.' })
 		}
 
 		try {
