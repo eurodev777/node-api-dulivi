@@ -447,6 +447,7 @@ class OrderController {
 						id: product.id,
 						title: product.title,
 						price: product.price,
+						image: product.image,
 						quantity: item.quantity,
 						subtotal: product.price * item.quantity,
 						complements,
