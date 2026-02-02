@@ -210,15 +210,19 @@ class StoreController {
 				})
 			}
 
+			delete store.password
+			delete store.mercadopago_access_token
+			delete store.mercadopago_refresh_token
+			delete store.mercadopago_token_expires_at
+			delete store.subscription_id
+			delete store.subscription_expires_at
+			delete store.subscription_status
+
 			// ✅ OK — retornar apenas dados públicos
 			res.json({
 				success: true,
 				data: {
-					id: store.id,
-					name: store.name,
-					slug: store.slug,
-					image: store.image,
-					is_open: true,
+					...store,
 				},
 			})
 		} catch (err) {
