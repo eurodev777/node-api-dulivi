@@ -17,6 +17,8 @@ Content-Type: application/json
   "email": "joaojpmoreira26@gmail.com.br",
   "password": "senha123"
 }
+### Buscar status da loja
+GET {{baseUrl}}/store/status/2
 ### Buscar loja por ID
 GET {{baseUrl}}/store/1
 ### Buscar loja por slug

@@ -1,8 +1,12 @@
 import storeRepository from '../../repositories/store/store.repository.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import { timestampToDate } from '../../utils/date.js'
 import { JWT_SECRET, MP_ACCESS_TOKEN } from '../../config/env.js'
 import axios from 'axios'
+import { getTursoClient } from '../../lib/turso.js'
+
+const turso = getTursoClient()
 
 const SECRET = JWT_SECRET
 const mpAccessToken = MP_ACCESS_TOKEN
@@ -231,6 +235,68 @@ class StoreController {
 				success: false,
 				error: 'INTERNAL_ERROR',
 			})
+		}
+	}
+	// Buscar status da loja
+	async getStoreStatus(req, res) {
+		const TRIAL_DAYS = 15
+		const mpAccessToken = MP_ACCESS_TOKEN
+
+		try {
+			const { fk_store_id } = req.params
+
+			// 1️⃣ Buscar dados da loja
+			const result = await turso.execute(
+				`SELECT first_subscription_at, subscription_id FROM stores WHERE id = ?`,
+				[fk_store_id],
+			)
+
+			if (!result.rows.length) {
+				return res.status(404).json({ error: 'Loja não encontrada' })
+			}
+
+			const store = result.rows[0]
+
+			// 🔹 Usando a util para converter timestamp
+			const firstDate = timestampToDate(store.first_subscription_at)
+
+			// 2️⃣ Verificar se está no trial
+			if (firstDate) {
+				const now = new Date()
+				const trialEnd = new Date(firstDate.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
+				if (now < trialEnd) {
+					await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
+					return res.json({ active: true, reason: 'trial' })
+				}
+			}
+
+			// 3️⃣ Verificar assinatura no Mercado Pago
+			if (store.subscription_id) {
+				const response = await axios.get(`https://api.mercadopago.com/preapproval/${store.subscription_id}`, {
+					headers: {
+						Authorization: `Bearer ${mpAccessToken}`,
+						'Content-Type': 'application/json',
+					},
+				})
+
+				const subscription = response.data
+
+				if (subscription.status === 'authorized') {
+					await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
+					return res.json({ active: true, reason: 'subscription' })
+				}
+
+				// pausa/cancelada
+				await turso.execute(`UPDATE stores SET is_closed = 1 WHERE id = ?`, [fk_store_id])
+				return res.json({ active: false, reason: subscription.status })
+			}
+
+			// 4️⃣ Sem assinatura
+			await turso.execute(`UPDATE stores SET is_closed = 1 WHERE id = ?`, [fk_store_id])
+			return res.json({ active: false, reason: 'no_subscription' })
+		} catch (err) {
+			console.error('Erro ao verificar status da loja:', err.response?.data || err)
+			return res.status(500).json({ error: 'Erro ao verificar status da loja' })
 		}
 	}
 }

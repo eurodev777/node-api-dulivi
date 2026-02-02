@@ -10,5 +10,6 @@ router.get('/api/store/:id', storeController.getById)
 router.get('/api/store/slug/:slug', storeController.getBySlug)
 router.put('/api/store/update/:id', authToken, storeController.update)
 router.get('/api/store/public/:slug', storeController.getPublicBySlug)
+router.get('/api/store/status/:fk_store_id', storeController.getStoreStatus)
 
 export default router

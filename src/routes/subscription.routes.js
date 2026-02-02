@@ -19,40 +19,33 @@ router.post('/subscriptions/subscribe', async (req, res) => {
 		const store = storeRes.rows[0]
 		const isFirstSubscription = !store.first_subscription_at
 		// 1️⃣ Buscar plano
-		const planRes = await turso.execute(`SELECT mp_plan_id, price FROM plans WHERE slug = ?`, [plan_slug])
+		const plan = await turso.execute(`SELECT mp_plan_id, price FROM plans WHERE slug = ?`, [plan_slug])
 
-		if (!planRes.rows.length) {
+		if (!plan.rows.length) {
 			return res.status(400).json({ error: 'Plano inválido' })
 		}
-
-		const plan = planRes.rows[0]
-		// 🔹 Se for primeira assinatura, calcula data de início do trial
-		let trialStartDate = null
-		let startDateMP = null
-		const TRIAL_DAYS = 15
+		// 2️⃣ Config auto_recurring
+		const autoRecurring = {
+			//transaction_amount: plan.rows[0].price,
+			transaction_amount: 1,
+			currency_id: 'BRL',
+		}
 
 		if (isFirstSubscription) {
-			trialStartDate = new Date() // hoje
-			const nextPaymentDate = new Date(trialStartDate)
-			nextPaymentDate.setDate(nextPaymentDate.getDate() + TRIAL_DAYS) // +15 dias
-
-			startDateMP = nextPaymentDate.toISOString() // data que vai para o Mercado Pago
+			autoRecurring.free_trial = {
+				frequency: 15,
+				frequency_type: 'days',
+			}
 		}
-		// 3️⃣ Criar assinatura no Mercado Pago
+		// 3️⃣ Criar assinatura
 		const response = await axios.post(
 			'https://api.mercadopago.com/preapproval',
 			{
-				preapproval_plan_id: plan.mp_plan_id,
+				preapproval_plan_id: plan.rows[0].mp_plan_id,
 				payer_email,
 				card_token_id,
 				external_reference: `store_${fk_store_id}`,
-				auto_recurring: {
-					transaction_amount: 1,
-					// transaction_amount: plan.price,
-					currency_id: 'BRL',
-					// se for primeira assinatura, definimos start_date para após o trial
-					...(startDateMP ? { start_date: startDateMP } : {}),
-				},
+				auto_recurring: autoRecurring,
 			},
 			{
 				headers: {
@@ -62,22 +55,26 @@ router.post('/subscriptions/subscribe', async (req, res) => {
 			},
 		)
 		// 4️⃣ Atualizar store
+		const updateQuery = isFirstSubscription
+			? `
+    UPDATE stores
+    SET subscription_id = ?,
+        subscription_status = ?,
+        plan = ?,
+        last_four_digits = ?,
+        first_subscription_at = ?
+    WHERE id = ?`
+			: `
+    UPDATE stores
+    SET subscription_id = ?,
+        subscription_status = ?,
+        plan = ?,
+        last_four_digits = ?
+    WHERE id = ?`
+
 		const updateFields = isFirstSubscription
-			? [response.data.id, plan_slug, last_four_digits, trialStartDate, fk_store_id]
-			: [response.data.id, plan_slug, last_four_digits, fk_store_id]
-
-		let updateQuery = `
-  UPDATE stores
-  SET subscription_id = ?,
-      plan = ?,
-      last_four_digits = ?
-`
-
-		if (isFirstSubscription) {
-			updateQuery += `, first_subscription_at = ?`
-		}
-
-		updateQuery += ` WHERE id = ?`
+			? [response.data.id, response.data.status, plan_slug, last_four_digits, Date.now(), fk_store_id]
+			: [response.data.id, response.data.status, plan_slug, last_four_digits, fk_store_id]
 
 		await turso.execute(updateQuery, updateFields)
 
