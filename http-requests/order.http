@@ -51,7 +51,7 @@ Content-Type: application/json
 GET {{baseUrl}}/order/?id=31
 Content-Type: application/json
 ### Resolver carrinho
-POST {{baseUrl}}/order/resolve
+POST {{baseUrl}}/cart/resolve
 Content-Type: application/json
 
 {
