@@ -1,8 +1,11 @@
 import storeRepository from '../../repositories/store/store.repository.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import { JWT_SECRET, MP_ACCESS_TOKEN } from '../../config/env.js'
+import axios from 'axios'
 
-const SECRET = process.env.JWT_SECRET
+const SECRET = JWT_SECRET
+const mpAccessToken = MP_ACCESS_TOKEN
 
 class StoreController {
 	// Cadastrar nova loja
@@ -190,7 +193,7 @@ class StoreController {
 			try {
 				const response = await axios.get(`https://api.mercadopago.com/preapproval/${store.subscription_id}`, {
 					headers: {
-						Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+						Authorization: `Bearer ${mpAccessToken}`,
 					},
 				})
 
