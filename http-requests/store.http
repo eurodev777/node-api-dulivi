@@ -1,5 +1,5 @@
 @baseUrl = http://localhost:3000/api
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJqb2FvanBtb3JlaXJhMjZAZ21haWwuY29tLmJyIiwiaWF0IjoxNzQ5NTI1NTU1LCJleHAiOjE3NTIxMTc1NTV9.0wOFXf8sfEwnQLzDm0cCQ2aXTXfTaoyJywvDbPF3vhc
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJqb2FvanBtb3JlaXJhMjVAZ21haWwuY29tLmJyIiwiaWF0IjoxNzcwMTg2MTk3LCJleHAiOjE3NzI3NzgxOTd9.e3cjGtvMRKS8o9DGycYV4ZjZ0d0-Y7Gj6NxUTpW5AK8
 ### Criar usuário
 POST {{baseUrl}}/store/create
 Content-Type: application/json
@@ -23,8 +23,13 @@ GET {{baseUrl}}/store/status/2
 GET {{baseUrl}}/store/1
 ### Buscar loja por slug
 GET {{baseUrl}}/store/public/caldinho-da-ashley
+Authorization: Bearer {{token}}
 ### Buscar token
-GET {{baseUrl}}/store/token/2
+GET {{baseUrl}}/store/status/2
+Authorization: Bearer {{token}}
+### Verificar status do Mercado Pago
+GET {{baseUrl}}/store/check-mercadopago/2
+Authorization: Bearer {{token}}
 ### Atualizar um loja
 PUT {{baseUrl}}/store/update/1
 Content-Type: application/json

@@ -9,7 +9,8 @@ router.post('/api/store/login', storeController.login)
 router.get('/api/store/:id', storeController.getById)
 router.get('/api/store/slug/:slug', storeController.getBySlug)
 router.put('/api/store/update/:id', authToken, storeController.update)
-router.get('/api/store/public/:slug', storeController.getPublicBySlug)
-router.get('/api/store/status/:fk_store_id', storeController.getStoreStatus)
+router.get('/api/store/public/:slug', authToken, storeController.getPublicBySlug)
+router.get('/api/store/status/:fk_store_id', authToken, storeController.getStoreStatus)
+router.get('/api/store/check-mercadopago/:fk_store_id', authToken, storeController.checkMercadoPagoStatus)
 
 export default router

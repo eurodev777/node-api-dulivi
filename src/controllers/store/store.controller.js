@@ -299,6 +299,46 @@ class StoreController {
 			return res.status(500).json({ error: 'Erro ao verificar status da loja' })
 		}
 	}
+	// Verificar status do Mercado Pago
+	async checkMercadoPagoStatus(req, res) {
+		try {
+			const { fk_store_id } = req.params
+
+			// 1️⃣ Buscar dados da loja
+			const result = await turso.execute(
+				`SELECT id, is_closed, mercadopago_access_token 
+       FROM stores 
+       WHERE id = ?`,
+				[fk_store_id],
+			)
+
+			if (!result.rows.length) {
+				return res.status(404).json({ error: 'Loja não encontrada' })
+			}
+
+			const store = result.rows[0]
+			const hasToken = !!store.mercadopago_access_token
+
+			// 2️⃣ Abrir ou fechar automaticamente
+			if (hasToken && store.is_closed) {
+				await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
+			}
+
+			if (!hasToken && !store.is_closed) {
+				await turso.execute(`UPDATE stores SET is_closed = 1 WHERE id = ?`, [fk_store_id])
+			}
+
+			// 3️⃣ Resposta limpa pro frontend
+			return res.json({
+				hasToken,
+				is_closed: hasToken ? 0 : 1,
+				showWarning: !hasToken,
+			})
+		} catch (err) {
+			console.error('Erro ao checar Mercado Pago:', err)
+			return res.status(500).json({ error: 'Erro ao verificar status do Mercado Pago' })
+		}
+	}
 }
 
 export default new StoreController()
