@@ -25,7 +25,7 @@ GET {{baseUrl}}/store/1
 GET {{baseUrl}}/store/public/caldinho-da-ashley
 Authorization: Bearer {{token}}
 ### Buscar token
-GET {{baseUrl}}/store/status/2
+GET {{baseUrl}}/store/status/1
 Authorization: Bearer {{token}}
 ### Verificar status do Mercado Pago
 GET {{baseUrl}}/store/check-mercadopago/2

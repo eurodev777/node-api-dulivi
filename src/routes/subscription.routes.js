@@ -249,11 +249,14 @@ router.put('/subscriptions/:fk_store_id/cancel', async (req, res) => {
 			},
 		)
 
-		// Atualiza seu banco
-		await turso.execute(`UPDATE stores SET subscription_status = 'cancelled' WHERE subscription_id = ?`, [
-			subscriptionId,
-		])
-
+		await turso.execute(
+			`UPDATE stores 
+   SET 
+     subscription_status = 'cancelled',
+     first_subscription_at = NULL
+   WHERE subscription_id = ?`,
+			[subscriptionId],
+		)
 		res.json({ success: true, status: response.data.status })
 	} catch (err) {
 		res.status(500).json(err.response?.data || err)

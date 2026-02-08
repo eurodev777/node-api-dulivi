@@ -245,7 +245,6 @@ class StoreController {
 		try {
 			const { fk_store_id } = req.params
 
-			// 1️⃣ Buscar dados da loja
 			const result = await turso.execute(
 				`SELECT first_subscription_at, subscription_id FROM stores WHERE id = ?`,
 				[fk_store_id],
@@ -257,20 +256,9 @@ class StoreController {
 
 			const store = result.rows[0]
 
-			// 🔹 Usando a util para converter timestamp
-			const firstDate = timestampToDate(store.first_subscription_at)
-
-			// 2️⃣ Verificar se está no trial
-			if (firstDate) {
-				const now = new Date()
-				const trialEnd = new Date(firstDate.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
-				if (now < trialEnd) {
-					await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
-					return res.json({ active: true, reason: 'trial' })
-				}
-			}
-
-			// 3️⃣ Verificar assinatura no Mercado Pago
+			/**
+			 * 1️⃣ SE TEM ASSINATURA → MERCADO PAGO MANDA
+			 */
 			if (store.subscription_id) {
 				const response = await axios.get(`https://api.mercadopago.com/preapproval/${store.subscription_id}`, {
 					headers: {
@@ -286,12 +274,29 @@ class StoreController {
 					return res.json({ active: true, reason: 'subscription' })
 				}
 
-				// pausa/cancelada
+				// cancelada, paused, etc
 				await turso.execute(`UPDATE stores SET is_closed = 1 WHERE id = ?`, [fk_store_id])
 				return res.json({ active: false, reason: subscription.status })
 			}
 
-			// 4️⃣ Sem assinatura
+			/**
+			 * 2️⃣ SEM ASSINATURA → VERIFICA TRIAL
+			 */
+			const firstDate = timestampToDate(store.first_subscription_at)
+
+			if (firstDate) {
+				const now = new Date()
+				const trialEnd = new Date(firstDate.getTime() + TRIAL_DAYS * 86400000)
+
+				if (now < trialEnd) {
+					await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
+					return res.json({ active: true, reason: 'trial' })
+				}
+			}
+
+			/**
+			 * 3️⃣ SEM ASSINATURA E SEM TRIAL
+			 */
 			await turso.execute(`UPDATE stores SET is_closed = 1 WHERE id = ?`, [fk_store_id])
 			return res.json({ active: false, reason: 'no_subscription' })
 		} catch (err) {
@@ -299,6 +304,7 @@ class StoreController {
 			return res.status(500).json({ error: 'Erro ao verificar status da loja' })
 		}
 	}
+
 	// Verificar status do Mercado Pago
 	async checkMercadoPagoStatus(req, res) {
 		try {
