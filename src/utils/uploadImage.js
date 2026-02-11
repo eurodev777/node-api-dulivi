@@ -8,7 +8,7 @@ import supabase from '../lib/supabase.js'
 const upload = multer({ storage: multer.memoryStorage() })
 
 // Middleware para o multer (vai ser usado na rota)
-export const multerMiddleware = upload.single('image')
+export const multerMiddleware = upload.single('imagem')
 
 // Função controller que faz o upload para o Supabase
 export const uploadImage = async (req, res) => {
