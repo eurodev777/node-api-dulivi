@@ -8,7 +8,7 @@ import supabase from '../lib/supabase.js'
 const upload = multer({ storage: multer.memoryStorage() })
 
 // Middleware para o multer (vai ser usado na rota)
-export const multerMiddleware = upload.single('imagem')
+export const multerMiddleware = upload.single('image')
 
 // Função controller que faz o upload para o Supabase
 export const uploadImage = async (req, res) => {
@@ -36,16 +36,18 @@ export const uploadImage = async (req, res) => {
 
 		const newFileName = `${timestamp}_${uniqueId}${fileExtension}`
 
-		const { data, error } = await supabase.storage.from('images').upload(`pizzas/${newFileName}`, convertedBuffer, {
-			contentType: 'image/webp', // Defina o tipo como WebP
-		})
+		const { data, error } = await supabase.storage
+			.from('dulivi')
+			.upload(`cardapio/${newFileName}`, convertedBuffer, {
+				contentType: 'image/webp', // Defina o tipo como WebP
+			})
 
 		if (error) {
 			console.error(error)
 			return res.status(500).send(error.message)
 		}
 
-		const url = supabase.storage.from('images').getPublicUrl(`pizzas/${newFileName}`).data.publicUrl
+		const url = supabase.storage.from('dulivi').getPublicUrl(`cardapio/${newFileName}`).data.publicUrl
 
 		res.send({ url })
 	} catch (error) {
