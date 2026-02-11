@@ -30,7 +30,7 @@ export const uploadImage = async (req, res) => {
 			// Converte a imagem para WebP
 			convertedBuffer = await sharp(buffer)
 				.toFormat('webp')
-				.webp({ quality: 50 }) // Aqui você pode ajustar a qualidade da conversão
+				.webp({ quality: 70 }) // Aqui você pode ajustar a qualidade da conversão
 				.toBuffer()
 		}
 
