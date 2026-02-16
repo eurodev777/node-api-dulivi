@@ -4,15 +4,53 @@ POST {{baseUrl}}/session/create
 Content-Type: application/json
 
 {
-  "total_amount": 25.97,
-  "delivery_method": "retirada",
-  "is_scheduled": "false",
-  "scheduled_for": "2025-07-08 23:29:50",
-  "delivery_address": "Av. Malibu, 700 - Vila Guilhermina, Mongaguá - SP. (Próximo ao Supermercado Pão de Açucar)",
-  "fk_delivery_address_id": null,
-  "payment_method": "dinheiro",
-  "customer_name": "El Barto",
-  "customer_whatsapp": "453675456"
+  "items": [
+    {
+      "quantity": 2,
+      "fk_product_id": 1,
+      "complements": [
+        {
+          "fk_complement_id": 1,
+          "quantity": 2
+        },
+        {
+          "fk_complement_id": 2,
+          "quantity": 1
+        },
+        {
+          "fk_complement_id": 4,
+          "quantity": 1
+        },
+        {
+          "fk_complement_id": 7,
+          "quantity": 1
+        },
+        {
+          "fk_complement_id": 8,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "quantity": 4,
+      "fk_product_id": 2,
+      "complements": [
+        {
+          "fk_complement_id": 1,
+          "quantity": 1
+        },
+        {
+          "fk_complement_id": 8,
+          "quantity": 1
+        }
+      ]
+    }
+  ],
+  "fk_store_id": 2,
+  "observation": "",
+  "delivery_method": "entrega",
+  "delivery_address": "Av. Das Palmeiras, 875 - Antártica, Praia Grande - SP ",
+  "fk_store_delivery_area_id": 2
 }
 ### Buscar sessão por ID
 GET {{baseUrl}}/session/checkout:a3b8967c-d022-4607-9e79-205c139b6638
@@ -29,27 +67,6 @@ Content-Type: application/json
     "fk_store_delivery_area_id": null,
     "fk_user_id": null,
     "fk_store_id": 1,
-    "items": [
-      {
-        "quantity": 1,
-        "fk_product_id": 2,
-        "complements": [
-          {
-            "fk_complement_id": 2,
-            "quantity": 1
-          },
-          {
-            "fk_complement_id": 3,
-            "quantity": 1
-          }
-        ]
-      },
-      {
-        "quantity": 1,
-        "fk_product_id": 1,
-        "complements": []
-      }
-    ]
   }
 }
 ### Finalizar pedido

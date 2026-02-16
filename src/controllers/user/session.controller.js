@@ -1,6 +1,7 @@
 import { getRedisClient } from '../../lib/redis.js'
 import { v4 as uuidv4 } from 'uuid'
 import orderController from './order.controller.js'
+import { calculateTotalOrderValue } from '../../utils/calculateTotalOrderValue.js'
 
 class SessionController {
 	// Cadastrar nova sessão
