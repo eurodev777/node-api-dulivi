@@ -11,7 +11,19 @@ class SessionController {
 		const id = uuidv4()
 		const sessionId = `checkout:${id}`
 
-		await redis.setEx(sessionId, 86400, JSON.stringify(data))
+		const { shipping = {}, calculatedTotal } = await calculateTotalOrderValue({
+			items: data.items,
+			fk_store_delivery_area_id: data.fk_store_delivery_area_id || null,
+			fk_store_id: data.fk_store_id,
+		})
+
+		const sessionData = {
+			...data,
+			...shipping,
+			total_amount: calculatedTotal,
+		}
+
+		await redis.setEx(sessionId, 86400, JSON.stringify(sessionData))
 
 		res.send({ order_token: sessionId })
 	}
@@ -46,6 +58,19 @@ class SessionController {
 
 		const order = raw_data ? JSON.parse(raw_data) : {}
 		const updatedOrder = { ...order, ...data }
+
+		// 🔥 Se recebeu fk_store_delivery_area_id, recalcula total com frete
+		if (data.fk_store_delivery_area_id) {
+			const { shipping, calculatedTotal } = await calculateTotalOrderValue({
+				items: updatedOrder.items,
+				fk_store_delivery_area_id: data.fk_store_delivery_area_id,
+				fk_store_id: updatedOrder.fk_store_id,
+			})
+
+			Object.assign(updatedOrder, shipping, {
+				total_amount: calculatedTotal,
+			})
+		}
 
 		await redis.setEx(id, 86400, JSON.stringify(updatedOrder))
 		return res.json(updatedOrder)
