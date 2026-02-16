@@ -20,7 +20,7 @@ class SessionController {
 
 		const sessionData = {
 			...data,
-			...shipping,
+			delivery_fee: shipping,
 			total_amount: calculatedTotal,
 		}
 
@@ -68,7 +68,8 @@ class SessionController {
 				fk_store_id: updatedOrder.fk_store_id,
 			})
 
-			Object.assign(updatedOrder, shipping, {
+			Object.assign(updatedOrder, {
+				delivery_fee: shipping,
 				total_amount: calculatedTotal,
 			})
 		}
