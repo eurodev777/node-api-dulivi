@@ -127,7 +127,7 @@ class PaymentController {
 	// Pagar no PIX
 	async createPixPayment(req, res) {
 		const store_id = req.params.id
-		const { value, phone_number } = req.body
+		const { value, email, phone_number } = req.body
 		// Validação para o número do usuário
 		if (!phone_number || typeof phone_number !== 'string') {
 			return res.status(400).json({ error: 'Número do usuário inválido ou ausente' })
@@ -147,7 +147,7 @@ class PaymentController {
 					transaction_amount: value,
 					payment_method_id: 'pix',
 					payer: {
-						email: 'brpagamentos123456@gmail.com',
+						email: email,
 					},
 				},
 			})

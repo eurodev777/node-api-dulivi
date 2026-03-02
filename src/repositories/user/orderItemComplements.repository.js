@@ -5,17 +5,12 @@ const turso = getTursoClient()
 class OrderItemsRepository {
 	// Criar item do pedido
 	async create(orderItemComplementsData) {
-		const { quantity, price_unit, fk_order_item_id, fk_complement_id } = orderItemComplementsData
+		const { quantity, fk_order_item_id, fk_complement_id } = orderItemComplementsData
 		try {
 			const result = await turso.execute(
-				`INSERT INTO order_item_complements (quantity, price_unit, fk_order_item_id, fk_complement_id)
-         VALUES (?, ?, ?, ?) RETURNING *`,
-				[
-					quantity,
-					price_unit,
-					fk_order_item_id,
-					fk_complement_id,
-				]
+				`INSERT INTO order_item_complements (quantity, fk_order_item_id, fk_complement_id)
+         VALUES (?, ?, ?) RETURNING *`,
+				[Number(quantity), Number(fk_order_item_id), Number(fk_complement_id)],
 			)
 
 			return result.rows[0]
@@ -26,10 +21,9 @@ class OrderItemsRepository {
 	// Encontrar todos items do pedido
 	async getAll(fk_order_item_id) {
 		try {
-			const result = await turso.execute(
-				`SELECT * FROM order_item_complements WHERE fk_order_item_id = ?`,
-				[fk_order_item_id]
-			)
+			const result = await turso.execute(`SELECT * FROM order_item_complements WHERE fk_order_item_id = ?`, [
+				fk_order_item_id,
+			])
 			return result.rows.length ? result.rows : null
 		} catch (error) {
 			throw error
@@ -38,10 +32,7 @@ class OrderItemsRepository {
 	// Encontrar item do pedido por ID
 	async getById(id) {
 		try {
-			const result = await turso.execute(
-				`SELECT * FROM order_item_complements WHERE id = ?`,
-				[id]
-			)
+			const result = await turso.execute(`SELECT * FROM order_item_complements WHERE id = ?`, [id])
 			return result.rows.length ? result.rows[0] : null
 		} catch (error) {
 			throw error
@@ -49,10 +40,9 @@ class OrderItemsRepository {
 	}
 	async getByOrderItemId(fk_order_item_id) {
 		try {
-			const result = await turso.execute(
-				`SELECT * FROM order_item_complements WHERE fk_order_item_id = ?`,
-				[fk_order_item_id]
-			)
+			const result = await turso.execute(`SELECT * FROM order_item_complements WHERE fk_order_item_id = ?`, [
+				fk_order_item_id,
+			])
 			return result.rows.length ? result.rows : null
 		} catch (error) {
 			throw error
@@ -79,9 +69,7 @@ class OrderItemsRepository {
 	}
 	// Deletar bairroitem do pedido
 	async delete(id) {
-		const result = await turso.execute(`DELETE FROM order_item_complements WHERE id = ?`, [
-			id,
-		])
+		const result = await turso.execute(`DELETE FROM order_item_complements WHERE id = ?`, [id])
 		return result.affectedRows > 0
 	}
 }

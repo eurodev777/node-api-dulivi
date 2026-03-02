@@ -5,16 +5,13 @@ const turso = getTursoClient()
 class OrderItemsRepository {
 	// Criar item do pedido
 	async create(orderItemsData) {
+		const { quantity, fk_product_id, fk_order_id } = orderItemsData
+
 		try {
 			const result = await turso.execute(
-				`INSERT INTO order_items (quantity, price_unit, fk_product_id, fk_order_id)
-         VALUES (?, ?, ?, ?) RETURNING *`,
-				[
-					orderItemsData.quantity,
-					orderItemsData.price_unit,
-					orderItemsData.fk_product_id,
-					orderItemsData.fk_order_id,
-				]
+				`INSERT INTO order_items (quantity, fk_product_id, fk_order_id)
+         VALUES (?, ?, ?) RETURNING *`,
+				[Number(quantity), Number(fk_product_id), Number(fk_order_id)],
 			)
 
 			return result.rows[0]

@@ -17,6 +17,7 @@ class OrderController {
 		const {
 			total_amount,
 			delivery_method = 'entrega',
+			delivery_fee = 0,
 			is_scheduled = 0,
 			scheduled_for,
 			delivery_address,
@@ -24,6 +25,9 @@ class OrderController {
 			customer_name = null,
 			customer_whatsapp = null,
 			observation = null,
+			card_brand = null,
+			payment_type = null,
+			change = null,
 			paid = 0,
 			status = 'confirmado',
 			mercadopago_pay_id = null,
@@ -34,6 +38,10 @@ class OrderController {
 			fk_store_id,
 		} = req.body
 		const items = req.body.items
+
+		if (!Array.isArray(items)) {
+			return res.status(400).json({ error: 'Items inválido' })
+		}
 
 		try {
 			// 1. Criar pedido
@@ -47,6 +55,9 @@ class OrderController {
 				customer_name,
 				customer_whatsapp,
 				observation,
+				card_brand,
+				payment_type,
+				change,
 				paid,
 				status,
 				mercadopago_pay_id,
@@ -65,7 +76,6 @@ class OrderController {
 			for (const item of items) {
 				const newItem = await orderItemsRepository.create({
 					quantity: item.quantity,
-					price_unit: item.price_unit,
 					fk_product_id: item.fk_product_id,
 					fk_order_id: orderId,
 				})
@@ -197,7 +207,7 @@ class OrderController {
 
 					return {
 						product_title: product?.title || 'Produto não encontrado',
-						price: item.price_unit,
+						price: product.price,
 						quantity: item.quantity,
 						complements: formattedComplements,
 					}

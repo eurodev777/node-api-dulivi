@@ -18,6 +18,7 @@ Content-Type: application/json
 
 {
   "value": 30.8,
+  "email": "joaojpmoreira25@gmail.com",
   "phone_number": "13991027026"
 }
 ### Status do Pagamento

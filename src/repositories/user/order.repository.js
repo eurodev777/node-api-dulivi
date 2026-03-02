@@ -16,6 +16,9 @@ class OrderRepository {
 			customer_name,
 			customer_whatsapp,
 			observation,
+			card_brand,
+			payment_type,
+			change,
 			paid,
 			status,
 			mercadopago_pay_id,
@@ -28,31 +31,59 @@ class OrderRepository {
 
 		try {
 			const result = await turso.execute(
-				`INSERT INTO orders (total_amount, delivery_fee, delivery_method, is_scheduled, scheduled_for, delivery_address, payment_method, customer_name, customer_whatsapp, observation, paid, status, mercadopago_pay_id, created_at, fk_store_delivery_areas_id, fk_delivery_address_id, fk_user_id, fk_store_id)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
+				`INSERT INTO orders (
+				total_amount,
+				delivery_fee,
+				delivery_method,
+				is_scheduled,
+				scheduled_for,
+				delivery_address,
+				payment_method,
+				customer_name,
+				customer_whatsapp,
+				observation,
+				card_brand,
+			  payment_type,
+			  change,
+				paid,
+				status,
+				mercadopago_pay_id,
+				created_at,
+				fk_store_delivery_areas_id,
+				fk_delivery_address_id,
+				fk_user_id,
+				fk_store_id
+			)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			RETURNING *`,
 				[
-					total_amount,
-					delivery_fee ?? 7,
-					delivery_method,
-					is_scheduled,
+					Number(total_amount),
+					Number(delivery_fee ?? 7),
+					String(delivery_method),
+					Number(is_scheduled ?? 0),
 					scheduled_for ?? null,
-					delivery_address,
-					payment_method,
+					delivery_address ?? null,
+					String(payment_method),
 					customer_name ?? null,
 					customer_whatsapp ?? null,
 					observation ?? null,
-					paid,
-					status,
+					card_brand ?? null,
+					payment_type ?? null,
+					change ?? null,
+					Number(paid ?? 0),
+					status ?? 'confirmado',
 					mercadopago_pay_id ?? null,
-					created_at,
+					created_at ?? new Date().toISOString(),
 					fk_store_delivery_areas_id ?? null,
 					fk_delivery_address_id ?? null,
 					fk_user_id ?? null,
-					fk_store_id,
-				]
+					Number(fk_store_id),
+				],
 			)
+
 			return result.rows[0]
 		} catch (error) {
+			console.error('ERRO NO REPOSITORY:', error)
 			throw error
 		}
 	}

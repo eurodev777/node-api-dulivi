@@ -1,30 +1,14 @@
 @baseUrl = http://localhost:3000/api
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwid2hhdHNhcHAiOiIxMzk5MTQwMjUxMSIsImlhdCI6MTc0ODcyMDQ2NiwiZXhwIjoxNzQ5MzI1MjY2fQ.qLMCkP3y2iffeMdpvHO0MCJo4rKdVLwdUyGqX4JWfX0
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJqb2FvanBtb3JlaXJhMjVAZ21haWwuY29tIiwiaWF0IjoxNzcyNDc2ODcxLCJleHAiOjE3NzUwNjg4NzF9.wY3iz1L65dAWoAyhrr0V-PHiU_7zJdaCvSTOX6d-2y0
 ### Criar pedido
 POST {{baseUrl}}/order/create
 Content-Type: application/json
 
 {
-  "total_amount": 10.97,
-  "delivery_method": "no_local",
-  "is_scheduled": "false",
-  "scheduled_for": "2025-06-02 00:00:00",
-  "delivery_address": "Av. Malibu, 700 - Vila Guilhermina, Mongaguá - SP. (Próximo ao Supermercado Pão de Açucar)",
-  "payment_method": "pix",
-  "customer_name": "João",
-  "customer_whatsapp": "13991027026",
-  "paid": "false",
-  "status": "recebido",
-  "mercadopago_pay_id": "9436adsvbc98236438pop4oi6598oper988",
-  "created_at": "2025-06-02 00:00:00",
-  "fk_delivery_address_id": null,
-  "fk_user_id": null,
-  "fk_store_id": 1,
   "items": [
     {
-      "quantity": 2,
-      "price_unit": 3.99,
-      "fk_product_id": 2,
+      "quantity": 1,
+      "fk_product_id": 1,
       "complements": [
         {
           "fk_complement_id": 1,
@@ -32,23 +16,75 @@ Content-Type: application/json
         },
         {
           "fk_complement_id": 2,
-          "quantity": 2
+          "quantity": 1
+        },
+        {
+          "fk_complement_id": 4,
+          "quantity": 1
         }
       ]
     },
     {
-      "quantity": 1,
-      "price_unit": 2.99,
+      "quantity": 4,
       "fk_product_id": 1,
-      "complements": []
+      "complements": [
+        {
+          "fk_complement_id": 1,
+          "quantity": 2
+        },
+        {
+          "fk_complement_id": 2,
+          "quantity": 1
+        },
+        {
+          "fk_complement_id": 4,
+          "quantity": 1
+        },
+        {
+          "fk_complement_id": 7,
+          "quantity": 1
+        },
+        {
+          "fk_complement_id": 9,
+          "quantity": 1
+        },
+        {
+          "fk_complement_id": 8,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "quantity": 2,
+      "fk_product_id": 2,
+      "complements": [
+        {
+          "fk_complement_id": 4,
+          "quantity": 1
+        },
+        {
+          "fk_complement_id": 7,
+          "quantity": 1
+        }
+      ]
     }
-  ]
+  ],
+  "fk_store_id": 2,
+  "observation": "",
+  "delivery_fee": 5,
+  "total_amount": 87.93,
+  "delivery_method": "entrega",
+  "delivery_address": "Av. Das Palmeiras, 875 - Antártica, Praia Grande - SP ",
+  "fk_store_delivery_areas_id": 2,
+  "payment_method": "pix",
+  "payment_type": "online"
 }
 ### Buscar todos pedido
-GET {{baseUrl}}/order/all?fk_store_id=1
+GET {{baseUrl}}/order/all?fk_store_id=2
 Content-Type: application/json
+Authorization: Bearer {{token}}
 ### Buscar pedido por ID
-GET {{baseUrl}}/order/?id=31
+GET {{baseUrl}}/order/42
 Content-Type: application/json
 ### Resolver carrinho
 POST {{baseUrl}}/cart/resolve

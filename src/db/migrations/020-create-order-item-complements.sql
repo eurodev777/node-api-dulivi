@@ -1,7 +1,6 @@
 CREATE TABLE IF NOT EXISTS order_item_complements (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   quantity INTEGER,
-  price_unit INTEGER,
   fk_order_item_id INTEGER NOT NULL,
   fk_complement_id INTEGER NOT NULL,
   FOREIGN KEY (fk_order_item_id) REFERENCES order_items(id) ON DELETE CASCADE,
