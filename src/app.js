@@ -8,11 +8,11 @@ import './jobs/scheduler.js'
 
 const urls = [
 	// Domínios permitidos
-	'https://menu-dulivi.netlify.app', // Cardápio production
-	'https://painel-dulivi.netlify.app', // Painel production
+	'https://menu.dulivi.com.br/', // Cardápio production
+	'https://painel.dulivi.com.br/', // Painel production
 	'https://cardapio-digital-api-nzm1.onrender.com', // API production
 	'https://node-api-dulivi-whatsapp-bot-production.up.railway.app', // API production
-	'https://lp-dulivi.netlify.app', // LP
+	'https://dulivi.com.br/', // LP
 	'http://localhost:8080', // LP development
 	'http://localhost:3000', // API development
 	'http://localhost:5173', // Dulivi development
