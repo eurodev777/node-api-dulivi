@@ -16,7 +16,7 @@ Authorization: Bearer {{token}}
   "fk_store_id": 2
 }
 ### Buscar assinatura
-GET {{baseUrl}}/subscriptions/2
+GET {{baseUrl}}/subscriptions/12
 Content-Type: application/json
 Authorization: Bearer {{token}}
 ### Suspender assinatura

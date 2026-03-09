@@ -9,35 +9,15 @@ const turso = getTursoClient()
 router.post('/subscriptions/subscribe', async (req, res) => {
 	try {
 		const { fk_store_id, plan_slug, payer_email, card_token_id, last_four_digits } = req.body
-		// 0️⃣ Buscar store
-		const storeRes = await turso.execute(`SELECT first_subscription_at FROM stores WHERE id = ?`, [fk_store_id])
 
-		if (!storeRes.rows.length) {
-			return res.status(404).json({ error: 'Loja não encontrada' })
-		}
-
-		const store = storeRes.rows[0]
-		const isFirstSubscription = !store.first_subscription_at
 		// 1️⃣ Buscar plano
 		const plan = await turso.execute(`SELECT mp_plan_id, price FROM plans WHERE slug = ?`, [plan_slug])
 
 		if (!plan.rows.length) {
 			return res.status(400).json({ error: 'Plano inválido' })
 		}
-		// 2️⃣ Config auto_recurring
-		const autoRecurring = {
-			//transaction_amount: plan.rows[0].price,
-			transaction_amount: 1,
-			currency_id: 'BRL',
-		}
 
-		if (isFirstSubscription) {
-			autoRecurring.free_trial = {
-				frequency: 15,
-				frequency_type: 'days',
-			}
-		}
-		// 3️⃣ Criar assinatura
+		// 2️⃣ Criar assinatura
 		const response = await axios.post(
 			'https://api.mercadopago.com/preapproval',
 			{
@@ -45,7 +25,10 @@ router.post('/subscriptions/subscribe', async (req, res) => {
 				payer_email,
 				card_token_id,
 				external_reference: `store_${fk_store_id}`,
-				auto_recurring: autoRecurring,
+				auto_recurring: {
+					transaction_amount: 1,
+					currency_id: 'BRL',
+				},
 			},
 			{
 				headers: {

@@ -13,6 +13,7 @@ class StoreRepository {
 			image,
 			phone,
 			cpf,
+			trial_ends_at,
 			minimum_order,
 			default_delivery_fee,
 			delivery_time_min,
@@ -33,6 +34,7 @@ class StoreRepository {
 					phone,
 					cpf,
 					slug,
+					trial_ends_at,
 					minimum_order,
 					default_delivery_fee,
 					delivery_time_min,
@@ -41,9 +43,10 @@ class StoreRepository {
 					close_time,
 					store_location,
 					subscription_status,
-					subscription_expires_at
+					subscription_expires_at,
+					free_trial
 				) VALUES (
-					?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', DATETIME('now', '+15 days')
+					?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', DATETIME('now', '+15 days'), 1
 				) RETURNING *`,
 				[
 					name,
@@ -53,6 +56,7 @@ class StoreRepository {
 					phone || null,
 					cpf || null,
 					slug,
+					trial_ends_at,
 					minimum_order || 15,
 					default_delivery_fee || 5,
 					delivery_time_min || 90,
@@ -60,7 +64,7 @@ class StoreRepository {
 					open_time || '18:00',
 					close_time || '22:00',
 					store_location || 'São Paulo, SP',
-				]
+				],
 			)
 			return result.rows[0]
 		} catch (error) {

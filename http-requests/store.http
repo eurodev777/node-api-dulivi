@@ -1,13 +1,15 @@
 @baseUrl = http://localhost:3000/api
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJqb2FvanBtb3JlaXJhMjVAZ21haWwuY29tLmJyIiwiaWF0IjoxNzcwMTg2MTk3LCJleHAiOjE3NzI3NzgxOTd9.e3cjGtvMRKS8o9DGycYV4ZjZ0d0-Y7Gj6NxUTpW5AK8
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJqb2FvanBtb3JlaXJhMjVAZ21haWwuY29tIiwiaWF0IjoxNzczMDgxOTAyLCJleHAiOjE3NzU2NzM5MDJ9.jES2PQMRA7dOFGduguzpIypO96uKHIkPX4MAUZhYH20
 ### Criar usuário
 POST {{baseUrl}}/store/create
 Content-Type: application/json
 
 {
   "name": "aNabih Esfiha'ss",
-  "email": "babaca@sdasdasd.com",
-  "password": "pingu2004"
+  "email": "abc@abc.com",
+  "password": "senha1234",
+  "cpf": "13991027026",
+  "phone": "49827089838"
 }
 ### Cadastrar loja
 POST {{baseUrl}}/store/login
@@ -25,7 +27,7 @@ GET {{baseUrl}}/store/1
 GET {{baseUrl}}/store/public/caldinho-da-ashley
 Authorization: Bearer {{token}}
 ### Buscar token
-GET {{baseUrl}}/store/status/1
+GET {{baseUrl}}/store/status/19
 Authorization: Bearer {{token}}
 ### Verificar status do Mercado Pago
 GET {{baseUrl}}/store/check-mercadopago/2

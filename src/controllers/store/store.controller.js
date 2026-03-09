@@ -1,7 +1,6 @@
 import storeRepository from '../../repositories/store/store.repository.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import { timestampToDate } from '../../utils/date.js'
 import { JWT_SECRET, MP_ACCESS_TOKEN } from '../../config/env.js'
 import axios from 'axios'
 import { getTursoClient } from '../../lib/turso.js'
@@ -18,6 +17,9 @@ class StoreController {
 
 		const hashedPassword = await bcrypt.hash(password, 10)
 
+		const TRIAL_DAYS = 15
+		const trialEndsAt = Math.floor(Date.now() + TRIAL_DAYS * 86400000)
+
 		try {
 			const newStore = await storeRepository.create({
 				name,
@@ -25,6 +27,7 @@ class StoreController {
 				password: hashedPassword,
 				phone,
 				cpf,
+				trial_ends_at: trialEndsAt,
 			})
 			//Retorno da API
 			res.status(200).json({
@@ -239,14 +242,15 @@ class StoreController {
 	}
 	// Buscar status da loja
 	async getStoreStatus(req, res) {
-		const TRIAL_DAYS = 15
 		const mpAccessToken = MP_ACCESS_TOKEN
 
 		try {
 			const { fk_store_id } = req.params
 
 			const result = await turso.execute(
-				`SELECT first_subscription_at, subscription_id FROM stores WHERE id = ?`,
+				`SELECT subscription_id, free_trial, trial_ends_at, is_closed 
+			 FROM stores 
+			 WHERE id = ?`,
 				[fk_store_id],
 			)
 
@@ -256,8 +260,33 @@ class StoreController {
 
 			const store = result.rows[0]
 
+			const freeTrial = Number(store.free_trial) === 1
+			const trialEndsAt = Number(store.trial_ends_at)
+			const now = Date.now()
+
+			const diffMs = trialEndsAt - now
+			const diffDays = Math.ceil(diffMs / 86400000)
+
 			/**
-			 * 1️⃣ SE TEM ASSINATURA → MERCADO PAGO MANDA
+			 * 1️⃣ FREE TRIAL
+			 */
+			if (freeTrial && trialEndsAt) {
+				if (now < trialEndsAt) {
+					if (store.is_closed === 1) {
+						await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
+					}
+
+					return res.json({ active: true, reason: 'trial', trial: `Faltam ${diffDays} dias` })
+				}
+
+				// trial expirou
+				await turso.execute(`UPDATE stores SET free_trial = 0, is_closed = 1 WHERE id = ?`, [fk_store_id])
+
+				return res.json({ active: false, reason: 'trial_expired' })
+			}
+
+			/**
+			 * 2️⃣ ASSINATURA
 			 */
 			if (store.subscription_id) {
 				const response = await axios.get(`https://api.mercadopago.com/preapproval/${store.subscription_id}`, {
@@ -270,41 +299,29 @@ class StoreController {
 				const subscription = response.data
 
 				if (subscription.status === 'authorized') {
-					await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
+					if (store.is_closed === 1) {
+						await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
+					}
+
 					return res.json({ active: true, reason: 'subscription' })
 				}
 
-				// cancelada, paused, etc
 				await turso.execute(`UPDATE stores SET is_closed = 1 WHERE id = ?`, [fk_store_id])
+
 				return res.json({ active: false, reason: subscription.status })
 			}
 
 			/**
-			 * 2️⃣ SEM ASSINATURA → VERIFICA TRIAL
-			 */
-			const firstDate = timestampToDate(store.first_subscription_at)
-
-			if (firstDate) {
-				const now = new Date()
-				const trialEnd = new Date(firstDate.getTime() + TRIAL_DAYS * 86400000)
-
-				if (now < trialEnd) {
-					await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
-					return res.json({ active: true, reason: 'trial' })
-				}
-			}
-
-			/**
-			 * 3️⃣ SEM ASSINATURA E SEM TRIAL
+			 * 3️⃣ SEM TRIAL E SEM ASSINATURA
 			 */
 			await turso.execute(`UPDATE stores SET is_closed = 1 WHERE id = ?`, [fk_store_id])
+
 			return res.json({ active: false, reason: 'no_subscription' })
 		} catch (err) {
 			console.error('Erro ao verificar status da loja:', err.response?.data || err)
 			return res.status(500).json({ error: 'Erro ao verificar status da loja' })
 		}
 	}
-
 	// Verificar status do Mercado Pago
 	async checkMercadoPagoStatus(req, res) {
 		try {

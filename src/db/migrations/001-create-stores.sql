@@ -27,5 +27,8 @@ CREATE TABLE IF NOT EXISTS stores (
     last_four_digits TEXT,
     plan TEXT,
     subscription_id TEXT,
+    free_trial INTEGER DEFAULT 1,
+    first_subscription_at TEXT,
+    trial_ends_at TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
