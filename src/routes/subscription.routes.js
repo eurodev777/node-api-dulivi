@@ -17,7 +17,7 @@ router.post('/subscriptions/subscribe', async (req, res) => {
 			return res.status(400).json({ error: 'Plano inválido' })
 		}
 
-		// 2️⃣ Criar assinatura
+		// 2️⃣ Criar assinatura no MercadoPago
 		const response = await axios.post(
 			'https://api.mercadopago.com/preapproval',
 			{
@@ -37,29 +37,19 @@ router.post('/subscriptions/subscribe', async (req, res) => {
 				},
 			},
 		)
-		// 4️⃣ Atualizar store
-		const updateQuery = isFirstSubscription
-			? `
-    UPDATE stores
-    SET subscription_id = ?,
-        subscription_status = ?,
-        plan = ?,
-        last_four_digits = ?,
-        first_subscription_at = ?
-    WHERE id = ?`
-			: `
-    UPDATE stores
-    SET subscription_id = ?,
-        subscription_status = ?,
-        plan = ?,
-        last_four_digits = ?
-    WHERE id = ?`
 
-		const updateFields = isFirstSubscription
-			? [response.data.id, response.data.status, plan_slug, last_four_digits, Date.now(), fk_store_id]
-			: [response.data.id, response.data.status, plan_slug, last_four_digits, fk_store_id]
-
-		await turso.execute(updateQuery, updateFields)
+		// 3️⃣ Atualizar store
+		await turso.execute(
+			`
+			UPDATE stores
+			SET subscription_id = ?,
+			    subscription_status = ?,
+			    plan = ?,
+			    last_four_digits = ?
+			WHERE id = ?
+			`,
+			[response.data.id, response.data.status, plan_slug, last_four_digits, fk_store_id],
+		)
 
 		res.json(response.data)
 	} catch (err) {
