@@ -60,15 +60,13 @@ class SessionController {
 
 		const order = JSON.parse(raw_data)
 		const updatedOrder = { ...order, ...data }
-		console.log(updatedOrder.fk_store_delivery_areas_id)
-		console.log(data.fk_store_delivery_areas_id)
 
 		// recalcular frete se o campo veio no request
-		if (data.fk_store_delivery_areas_id !== undefined) {
+		if (updatedOrder.fk_store_delivery_areas_id !== undefined) {
 			const { shipping, calculatedTotal } = await calculateTotalOrderValue({
 				items: updatedOrder.items,
 				delivery_method: updatedOrder.delivery_method,
-				fk_store_delivery_areas_id: data.fk_store_delivery_areas_id,
+				fk_store_delivery_areas_id: updatedOrder.fk_store_delivery_areas_id,
 				fk_store_id: updatedOrder.fk_store_id,
 			})
 
