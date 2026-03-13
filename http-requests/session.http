@@ -53,7 +53,7 @@ Content-Type: application/json
   "fk_store_delivery_area_id": 2
 }
 ### Buscar sessão por ID
-GET {{baseUrl}}/session/checkout:34d9eb2a-cb84-45a2-9d83-a2e092ff5d5a
+GET {{baseUrl}}/session/checkout:9efb03c2-5346-4256-be13-a41622343714
 ### Atualizar um sessão
 PUT {{baseUrl}}/session/update/checkout:b21243cf-e121-4287-8ac0-4d6abdc4edf7
 Content-Type: application/json

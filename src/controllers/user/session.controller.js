@@ -58,15 +58,15 @@ class SessionController {
 			return res.status(404).json({ success: false, error: 'Sessão não encontrada' })
 		}
 
-		const order = raw_data ? JSON.parse(raw_data) : {}
+		const order = JSON.parse(raw_data)
 		const updatedOrder = { ...order, ...data }
 
-		// 🔥 Se recebeu fk_store_delivery_area_id, recalcula total com frete
-		if (data.fk_store_delivery_area_id) {
+		// recalcular frete se o campo veio no request
+		if (data.fk_store_delivery_area_id !== undefined) {
 			const { shipping, calculatedTotal } = await calculateTotalOrderValue({
 				items: updatedOrder.items,
 				delivery_method: updatedOrder.delivery_method,
-				fk_store_delivery_area_id: data.fk_store_delivery_area_id,
+				fk_store_delivery_area_id: updatedOrder.fk_store_delivery_area_id,
 				fk_store_id: updatedOrder.fk_store_id,
 			})
 
@@ -77,6 +77,7 @@ class SessionController {
 		}
 
 		await redis.setEx(id, 86400, JSON.stringify(updatedOrder))
+
 		return res.json(updatedOrder)
 	}
 	// Atualizar sessão
