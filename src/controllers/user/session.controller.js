@@ -62,7 +62,7 @@ class SessionController {
 		const updatedOrder = { ...order, ...data }
 
 		// recalcular frete se o campo veio no request
-		if (data.fk_store_delivery_areas_id) {
+		if (updatedOrder.fk_store_delivery_areas_id) {
 			const { shipping, calculatedTotal } = await calculateTotalOrderValue({
 				items: updatedOrder.items,
 				delivery_method: updatedOrder.delivery_method,
