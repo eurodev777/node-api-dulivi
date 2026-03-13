@@ -58,11 +58,15 @@ class SessionController {
 			return res.status(404).json({ success: false, error: 'Sessão não encontrada' })
 		}
 
+		const cleanedData = Object.fromEntries(
+			Object.entries(data).filter(([_, v]) => v !== undefined)
+		)
+
 		const order = JSON.parse(raw_data)
-		const updatedOrder = { ...order, ...data }
+		const updatedOrder = { ...order, ...cleanedData }
 
 		// recalcular frete se o campo veio no request
-		if (updatedOrder.fk_store_delivery_areas_id) {
+		if (cleanedData.fk_store_delivery_areas_id != null) {
 			const { shipping, calculatedTotal } = await calculateTotalOrderValue({
 				items: updatedOrder.items,
 				delivery_method: updatedOrder.delivery_method,
