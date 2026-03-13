@@ -27,7 +27,7 @@ export const calculateTotalOrderValue = async ({ items, fk_store_delivery_areas_
 	// Calcular frete
 	let shipping = 0
 
-	const deliveryAreaId = Number(fk_store_delivery_areas_id)
+	const deliveryAreaId = parseInt(fk_store_delivery_areas_id)
 
 	if (delivery_method === 'entrega') {
 		const area = deliveryAreaId > 0 ? await deliveryAreaRepository.getById(deliveryAreaId) : null
