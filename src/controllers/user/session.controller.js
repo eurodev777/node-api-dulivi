@@ -15,7 +15,7 @@ class SessionController {
 		const { shipping = {}, calculatedTotal } = await calculateTotalOrderValue({
 			items: data.items,
 			delivery_method: data.delivery_method,
-			fk_store_delivery_area_id: data.fk_store_delivery_area_id || null,
+			fk_store_delivery_areas_id: data.fk_store_delivery_areas_id || null,
 			fk_store_id: data.fk_store_id,
 		})
 
@@ -62,11 +62,11 @@ class SessionController {
 		const updatedOrder = { ...order, ...data }
 
 		// recalcular frete se o campo veio no request
-		if (data.fk_store_delivery_area_id !== undefined) {
+		if (data.fk_store_delivery_areas_id !== undefined) {
 			const { shipping, calculatedTotal } = await calculateTotalOrderValue({
 				items: updatedOrder.items,
 				delivery_method: updatedOrder.delivery_method,
-				fk_store_delivery_area_id: updatedOrder.fk_store_delivery_area_id,
+				fk_store_delivery_areas_id: updatedOrder.fk_store_delivery_areas_id,
 				fk_store_id: updatedOrder.fk_store_id,
 			})
 
