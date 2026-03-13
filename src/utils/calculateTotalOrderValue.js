@@ -4,7 +4,7 @@ import deliveryAreaRepository from '../repositories/store/deliveryArea.repositor
 import storeRepository from '../repositories/store/store.repository.js'
 import round from '../utils/math.js'
 
-export const calculateTotalOrderValue = async ({ items, fk_store_delivery_area_id, fk_store_id }) => {
+export const calculateTotalOrderValue = async ({ items, fk_store_delivery_area_id, fk_store_id, delivery_method }) => {
 	let subtotal = 0
 
 	for (const item of items) {
@@ -55,7 +55,8 @@ export const calculateTotalOrderValue = async ({ items, fk_store_delivery_area_i
 	}
 
 	return {
-		calculatedTotal: total,
+		shipping,
+		calculatedTotal: subtotal,
 	}
 
 

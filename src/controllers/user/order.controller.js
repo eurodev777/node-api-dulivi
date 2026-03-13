@@ -329,6 +329,7 @@ class OrderController {
 			let totalAdjusted = false
 			const { shipping, calculatedTotal } = await calculateTotalOrderValue({
 				items,
+				delivery_method,
 				fk_store_delivery_area_id,
 				fk_store_id,
 			})
