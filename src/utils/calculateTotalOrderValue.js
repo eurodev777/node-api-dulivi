@@ -37,13 +37,20 @@ export const calculateTotalOrderValue = async ({ items, fk_store_delivery_area_i
 			const store = await storeRepository.getById(fk_store_id)
 			shipping = store && store.default_delivery_fee != null ? Number(store.default_delivery_fee) : 0
 		}
+
+		shipping = round(shipping)
+
+		return {
+			shipping,
+			calculatedTotal: round(subtotal + shipping)
+		}
 	}
 
 	shipping = round(shipping)
 
 	return {
 		shipping,
-		calculatedTotal: subtotal,
+		calculatedTotal: round(subtotal + shipping)
 	}
 
 

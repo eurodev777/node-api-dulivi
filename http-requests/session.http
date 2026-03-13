@@ -53,9 +53,9 @@ Content-Type: application/json
   "fk_store_delivery_area_id": 2
 }
 ### Buscar sessão por ID
-GET {{baseUrl}}/session/checkout:a3b8967c-d022-4607-9e79-205c139b6638
+GET {{baseUrl}}/session/checkout:34d9eb2a-cb84-45a2-9d83-a2e092ff5d5a
 ### Atualizar um sessão
-PUT {{baseUrl}}/session/update/checkout:a3b8967c-d022-4607-9e79-205c139b6638
+PUT {{baseUrl}}/session/update/checkout:b21243cf-e121-4287-8ac0-4d6abdc4edf7
 Content-Type: application/json
 
 {
@@ -66,7 +66,7 @@ Content-Type: application/json
     "created_at": "2025-07-14 22:23:12",
     "fk_store_delivery_area_id": null,
     "fk_user_id": null,
-    "fk_store_id": 1,
+    "fk_store_id": 1
   }
 }
 ### Finalizar pedido
