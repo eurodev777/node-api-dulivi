@@ -29,26 +29,34 @@ export const calculateTotalOrderValue = async ({ items, fk_store_delivery_area_i
 
 	const deliveryAreaId = Number(fk_store_delivery_area_id)
 
-	if (deliveryAreaId > 0) {
-		const area = await deliveryAreaRepository.getById(deliveryAreaId)
+	if (delivery_method === 'entrega') {
+		if (deliveryAreaId > 0) {
+			const area = await deliveryAreaRepository.getById(deliveryAreaId)
 
-		if (area) {
-			shipping = Number(area.delivery_fee)
+			if (area) {
+				shipping = Number(area.delivery_fee)
+			} else {
+				const store = await storeRepository.getById(fk_store_id)
+				shipping = store ? Number(store.default_delivery_fee) : 0
+			}
 		} else {
 			const store = await storeRepository.getById(fk_store_id)
 			shipping = store ? Number(store.default_delivery_fee) : 0
 		}
-	} else {
-		const store = await storeRepository.getById(fk_store_id)
-		shipping = store ? Number(store.default_delivery_fee) : 0
-	}
 
-	shipping = round(shipping)
-	// total
-	const total = round(subtotal + shipping)
+		shipping = round(shipping)
+		// total
+		const total = round(subtotal + shipping)
+
+		return {
+			shipping,
+			calculatedTotal: total,
+		}
+	}
 
 	return {
-		shipping,
 		calculatedTotal: total,
 	}
+
+
 }
