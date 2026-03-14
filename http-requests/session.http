@@ -49,19 +49,18 @@ Content-Type: application/json
   "fk_store_id": 2,
   "observation": "",
   "delivery_method": "entrega",
-  "delivery_address": "Av. Das Palmeiras, 875 - Antártica, Praia Grande - SP ",
-  "fk_store_delivery_areas_id": 2
+  "delivery_address": "Av. Das Palmeiras, 875 - Antártica, Praia Grande - SP "
 }
 ### Buscar sessão por ID
-GET {{baseUrl}}/session/checkout:f6cd827d-146f-4ab4-a216-f864ddda0cb9
+GET {{baseUrl}}/session/checkout:3530fd22-1397-43d5-b80d-2e7197c8fe1b
 ### Atualizar um sessão
-PUT {{baseUrl}}/session/update/checkout:f6cd827d-146f-4ab4-a216-f864ddda0cb9
+PUT {{baseUrl}}/session/update/checkout:3530fd22-1397-43d5-b80d-2e7197c8fe1b
 Content-Type: application/json
 
 {
   "data": {
-    "status": "recebido"
+      "fk_store_delivery_areas_id": 2
   }
 }
 ### Finalizar pedido
-POST {{baseUrl}}/session/finish/checkout:a3b8967c-d022-4607-9e79-205c139b6638
+POST {{baseUrl}}/session/finish/checkout:3530fd22-1397-43d5-b80d-2e7197c8fe1b

@@ -81,4 +81,8 @@ router.use(mercadoPagoRoutes)
 router.use(planRoutes)
 router.use(subscriptionRoutes)
 
+app.head("/api/healt'", (req, res) => {
+	res.sendStatus(204);
+});
+
 export default router
