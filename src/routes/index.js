@@ -81,7 +81,7 @@ router.use(mercadoPagoRoutes)
 router.use(planRoutes)
 router.use(subscriptionRoutes)
 
-app.head("/api/health", (req, res) => {
+router.head('/api/health', (req, res) => {
 	res.sendStatus(204);
 });
 
