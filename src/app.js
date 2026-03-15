@@ -10,7 +10,7 @@ const urls = [
 	// Domínios permitidos
 	'https://menu.dulivi.com.br', // Cardápio production
 	'https://painel.dulivi.com.br', // Painel production
-	'https://node-api-dulivi-production.up.railway.app', // API production
+	'https://api.dulivi.com.br', // API production
 	'https://dulivi.com.br', // LP
 	'http://localhost:8080', // LP development
 	'http://localhost:3000', // API development
