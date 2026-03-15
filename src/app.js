@@ -19,7 +19,7 @@ const urls = [
 
 export const corsOptions = {
 	origin: urls,
-	methods: ['GET', 'POST', 'PUT', 'DELETE'],
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD'],
 	allowedHeaders: ['Content-Type', 'Authorization'],
 	credentials: true,
 }
