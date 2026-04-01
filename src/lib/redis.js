@@ -1,7 +1,7 @@
 import { createClient } from 'redis'
 
 const client = createClient({
-	url: 'rediss://default:AbBZAAIncDJjODMzYzE2ZTE5M2U0ZmRkYTA5ZDY2N2FmYmNkN2NiMXAyNDUxNDU@fresh-foxhound-45145.upstash.io:6379',
+	url: 'rediss://default:gQAAAAAAAV-wAAIncDJmN2U5YWI2MDZlNjk0NmNhODdhZmI0ZWQwN2M4NmU1ZHAyOTAwMzI@deep-silkworm-90032.upstash.io:6379',
 })
 
 client.on('error', (err) => {
