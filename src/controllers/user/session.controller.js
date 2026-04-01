@@ -64,19 +64,17 @@ class SessionController {
 		const updatedOrder = { ...order, ...cleanedData }
 
 		// recalcular frete se o campo veio no request
-		if (updatedOrder.fk_store_delivery_areas_id) {
-			const { shipping, calculatedTotal } = await calculateTotalOrderValue({
-				items: updatedOrder.items,
-				delivery_method: updatedOrder.delivery_method,
-				fk_store_delivery_areas_id: updatedOrder.fk_store_delivery_areas_id,
-				fk_store_id: updatedOrder.fk_store_id,
-			})
+		const { shipping, calculatedTotal } = await calculateTotalOrderValue({
+			items: updatedOrder.items,
+			delivery_method: updatedOrder.delivery_method,
+			fk_store_delivery_areas_id: updatedOrder.fk_store_delivery_areas_id,
+			fk_store_id: updatedOrder.fk_store_id,
+		})
 
-			Object.assign(updatedOrder, {
-				delivery_fee: shipping,
-				total_amount: calculatedTotal,
-			})
-		}
+		Object.assign(updatedOrder, {
+			delivery_fee: shipping,
+			total_amount: calculatedTotal,
+		})
 
 		await redis.setEx(id, 86400, JSON.stringify(updatedOrder))
 
