@@ -160,6 +160,7 @@ class PaymentController {
 
 			res.send({
 				data: {
+					paymentId: payment.id,
 					qrcode: payment.point_of_interaction.transaction_data.qr_code_base64,
 					copiaecola: payment.point_of_interaction.transaction_data.qr_code,
 				},
