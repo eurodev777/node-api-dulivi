@@ -70,7 +70,7 @@ class OrderRepository {
 					card_brand ?? null,
 					payment_type ?? null,
 					change ?? null,
-					Number(paid ?? 0),
+					paid === true || paid === 'true' || paid === 1 || paid === '1' ? 1 : 0,
 					status ?? 'confirmado',
 					mercadopago_pay_id ?? null,
 					created_at ?? new Date().toISOString(),
