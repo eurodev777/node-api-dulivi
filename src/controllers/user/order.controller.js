@@ -1,4 +1,4 @@
-import orderRepository from '../../repositories/user/order.repository.js'
+import orderRepository from '../../repositories/user/order?.repository.js'
 import orderItemsRepository from '../../repositories/user/orderItems.repository.js'
 import orderItemComplementsRepository from '../../repositories/user/orderItemComplements.repository.js'
 import userRepository from '../../repositories/user/user.repository.js'
@@ -69,7 +69,7 @@ class OrderController {
 				fk_store_id,
 			})
 
-			const orderId = newOrder.id
+			const orderId = neworder?.id
 			// 2. Criar itens do pedido
 			const createdItems = []
 
@@ -124,11 +124,11 @@ class OrderController {
 
 			const serialized = await Promise.all(
 				orders.map(async (order) => {
-					let customerName = order.customer_name
-					let customerWhatsapp = order.customer_whatsapp
+					let customerName = order?.customer_name
+					let customerWhatsapp = order?.customer_whatsapp
 					// Se tiver user_id, busca os dados do usuário
-					if (order.fk_user_id) {
-						const user = await userRepository.getById(order.fk_user_id)
+					if (order?.fk_user_id) {
+						const user = await userRepository.getById(order?.fk_user_id)
 						if (user) {
 							customerName = user.name || customerName
 							customerWhatsapp = user.whatsapp || customerWhatsapp
@@ -136,16 +136,17 @@ class OrderController {
 					}
 
 					return {
-						id: order.id,
+						id: order?.id,
 						customer_name: customerName,
-						total_amount: order.total_amount,
-						delivery_method: order.delivery_method,
+						total_amount: order?.total_amount,
+						delivery_method: order?.delivery_method,
 						is_scheduled: order?.is_scheduled,
 						scheduled_for: order?.scheduled_for,
-						payment_method: order.payment_method,
+						payment_method: order?.payment_method,
+						mercadopago_pay_id: order?.mercadopago_pay_id,
 						paid: order?.paid || false,
-						status: order.status,
-						created_at: order.created_at,
+						status: order?.status,
+						created_at: order?.created_at,
 					}
 				}),
 			)
@@ -174,11 +175,11 @@ class OrderController {
 				})
 			}
 
-			let customerName = order.customer_name
-			let customerWhatsapp = order.customer_whatsapp
+			let customerName = order?.customer_name
+			let customerWhatsapp = order?.customer_whatsapp
 
 			// Se tiver user_id, busca os dados do usuário
-			const userId = parseValidId(order.fk_user_id)
+			const userId = parseValidId(order?.fk_user_id)
 			if (userId) {
 				const user = await userRepository.getById(userId)
 				if (user) {
@@ -187,7 +188,7 @@ class OrderController {
 				}
 			}
 			// Listar produtos do pedido
-			const orderItems = (await orderItemsRepository.getAll(order.id)) || []
+			const orderItems = (await orderItemsRepository.getAll(order?.id)) || []
 			const itemsWithDetails = await Promise.all(
 				orderItems.map(async (item) => {
 					const product = await productRepository.getById(item.fk_product_id)
@@ -216,24 +217,24 @@ class OrderController {
 			)
 
 			const serialized_order = {
-				id: order.id,
+				id: order?.id,
 				customer_name: customerName,
 				customer_whatsapp: customerWhatsapp,
-				total_amount: order.total_amount,
-				delivery_fee: order.delivery_fee,
-				delivery_method: order.delivery_method,
-				delivery_address: order.delivery_address,
+				total_amount: order?.total_amount,
+				delivery_fee: order?.delivery_fee,
+				delivery_method: order?.delivery_method,
+				delivery_address: order?.delivery_address,
 				is_scheduled: order?.is_scheduled,
 				scheduled_for: order?.scheduled_for,
-				payment_method: order.payment_method,
-				mercadopago_pay_id: order.mercadopago_pay_id,
-				card_brand: order.card_brand,
-				change: order.change,
-				observation: order.observation,
-				payment_type: order.payment_type,
+				payment_method: order?.payment_method,
+				mercadopago_pay_id: order?.mercadopago_pay_id,
+				card_brand: order?.card_brand,
+				change: order?.change,
+				observation: order?.observation,
+				payment_type: order?.payment_type,
 				paid: order?.paid || false,
-				status: order.status,
-				created_at: order.created_at,
+				status: order?.status,
+				created_at: order?.created_at,
 				items: itemsWithDetails,
 			}
 			// Retorno da API
@@ -418,7 +419,7 @@ class OrderController {
 
 			const new_order = await orderRepository.create(payload)
 
-			const order_id = new_order.id
+			const order_id = new_order?.id
 			// 2. Criar itens do pedido
 			const created_items = []
 			for (const item of items) {
