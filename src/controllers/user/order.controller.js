@@ -315,13 +315,13 @@ class OrderController {
 			status = 'confirmado',
 			mercadopago_pay_id = null,
 			created_at,
-			fk_store_delivery_area_id,
+			fk_store_delivery_areas_id,
 			fk_delivery_address_id = null,
 			fk_user_id = null,
 			fk_store_id,
 			items = [],
 		} = data
-		const deliveryAreaId = parseValidId(fk_store_delivery_area_id)
+		const deliveryAreaId = parseValidId(fk_store_delivery_areas_id)
 		const isPaidRequest = paid === true || paid === 'true' || paid === 1 || paid === '1'
 
 		try {
@@ -330,7 +330,7 @@ class OrderController {
 			const { shipping, calculatedTotal } = await calculateTotalOrderValue({
 				items,
 				delivery_method,
-				fk_store_delivery_area_id,
+				fk_store_delivery_areas_id,
 				fk_store_id,
 			})
 
@@ -377,7 +377,7 @@ class OrderController {
 				mercadopago_pay_id,
 				adjusted: totalAdjusted ? 'true' : 'false',
 				created_at: created_at || new Date(),
-				fk_store_delivery_area_id: deliveryAreaId,
+				fk_store_delivery_areas_id: deliveryAreaId,
 				fk_delivery_address_id,
 				fk_user_id,
 				fk_store_id,

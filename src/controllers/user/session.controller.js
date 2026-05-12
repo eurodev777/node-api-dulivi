@@ -93,8 +93,13 @@ class SessionController {
 		const order_data = raw_data ? JSON.parse(raw_data) : {}
 
 		try {
-			const order = await orderController.createFromSession(order_data)
-			return res.json(order)
+			const result = await orderController.createFromSession(order_data)
+
+			return res.json({
+				success: true,
+				order_id: result.order.id,
+				data: result,
+			})
 		} catch (error) {
 			return res.status(500).json({
 				success: false,
