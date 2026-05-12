@@ -361,6 +361,15 @@ class OrderController {
 					customerWhatsapp = user.whatsapp || customerWhatsapp
 				}
 			}
+			const defaultAddresses = {
+				retirada: 'Retirada no local',
+				no_local: 'Consumir no local',
+			}
+
+			const safeDeliveryAddress =
+				delivery_method === 'entrega'
+					? delivery_address?.trim() || 'Endereço não informado'
+					: defaultAddresses[delivery_method] || 'Não informado'
 			// 1. Criar pedido
 			const payload = {
 				total_amount: Number(total_amount),
@@ -368,7 +377,7 @@ class OrderController {
 				delivery_method,
 				is_scheduled,
 				scheduled_for,
-				delivery_address,
+				delivery_address: safeDeliveryAddress,
 				payment_method,
 				customer_name: customerName,
 				customer_whatsapp: customerWhatsapp,
