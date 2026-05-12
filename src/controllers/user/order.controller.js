@@ -362,9 +362,9 @@ class OrderController {
 				}
 			}
 			// 1. Criar pedido
-			const new_order = await orderRepository.create({
-				total_amount,
-				delivery_fee: shipping,
+			const payload = {
+				total_amount: Number(total_amount),
+				delivery_fee: Number(shipping),
 				delivery_method,
 				is_scheduled,
 				scheduled_for,
@@ -381,7 +381,19 @@ class OrderController {
 				fk_delivery_address_id,
 				fk_user_id,
 				fk_store_id,
-			})
+			}
+
+			console.log('ORDER PAYLOAD:', payload)
+
+			// detectar campo quebrado
+			for (const [key, value] of Object.entries(payload)) {
+				if (typeof value === 'number' && !Number.isFinite(value)) {
+					console.error(`CAMPO QUEBRADO: ${key} =`, value)
+					throw new Error(`${key} está NaN/Infinity`)
+				}
+			}
+
+			const new_order = await orderRepository.create(payload)
 
 			const order_id = new_order.id
 			// 2. Criar itens do pedido
