@@ -71,7 +71,7 @@ class OrderRepository {
 					payment_type ?? null,
 					change ?? null,
 					paid === true || paid === 'true' || paid === 1 || paid === '1' ? 1 : 0,
-					status ?? 'confirmado',
+					status ?? 'recebido',
 					mercadopago_pay_id ?? null,
 					created_at ?? new Date().toISOString(),
 					fk_store_delivery_areas_id ?? null,
