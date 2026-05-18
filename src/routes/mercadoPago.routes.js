@@ -1,6 +1,6 @@
 import express from 'express'
 import axios from 'axios'
-import { MP_CLIENT_ID, MP_CLIENT_SECRET } from '../config/env.js'
+import { MP_CLIENT_ID, MP_CLIENT_SECRET, MP_REDIRECT_URI } from '../config/env.js'
 import { getTursoClient } from '../lib/turso.js'
 import { encrypt } from '../lib/crypto.js'
 
@@ -22,13 +22,13 @@ router.get('/auth/mercadopago/callback', async (req, res) => {
 				client_secret: MP_CLIENT_SECRET,
 				grant_type: 'authorization_code',
 				code,
-				redirect_uri: 'https://cardapio-digital-api-nzm1.onrender.com/auth/mercadopago/callback',
+				redirect_uri: MP_REDIRECT_URI,
 			},
 			{
 				headers: {
 					'Content-Type': 'application/json',
 				},
-			}
+			},
 		)
 
 		const { access_token, refresh_token, user_id, expires_in } = response.data
@@ -39,7 +39,7 @@ router.get('/auth/mercadopago/callback', async (req, res) => {
           mercadopago_refresh_token = ?, 
           mercadopago_token_expires_at = ?
       WHERE id = ?`,
-			[encrypt(access_token), encrypt(refresh_token), expires_in, storeId]
+			[encrypt(access_token), encrypt(refresh_token), expires_in, storeId],
 		)
 		// 4️⃣ Redirecionar de volta pro painel
 		res.json({
