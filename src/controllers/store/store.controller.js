@@ -127,8 +127,8 @@ class StoreController {
 			delete store.email
 			delete store.mercadopago_access_token
 			delete store.mercadopago_refresh_token
-			delete store.mercadopago_token_expires_at
 			delete store.subscription_id
+			delete store.subscription_expires_at
 			delete store.subscription_status
 
 			//Retorno da API
@@ -228,10 +228,12 @@ class StoreController {
 			}
 
 			delete store.password
+			delete store.cpf
+			delete store.email
 			delete store.mercadopago_access_token
 			delete store.mercadopago_refresh_token
-			delete store.mercadopago_token_expires_at
 			delete store.subscription_id
+			delete store.subscription_expires_at
 			delete store.subscription_status
 
 			// ✅ OK — retornar apenas dados públicos
