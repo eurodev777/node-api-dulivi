@@ -121,6 +121,16 @@ class StoreController {
 					error: 'Slug não encontrado',
 				})
 			}
+
+			delete store.password
+			delete store.cpf
+			delete store.email
+			delete store.mercadopago_access_token
+			delete store.mercadopago_refresh_token
+			delete store.mercadopago_token_expires_at
+			delete store.subscription_id
+			delete store.subscription_status
+
 			//Retorno da API
 			res.status(200).json({
 				success: true,
@@ -222,7 +232,6 @@ class StoreController {
 			delete store.mercadopago_refresh_token
 			delete store.mercadopago_token_expires_at
 			delete store.subscription_id
-			delete store.subscription_expires_at
 			delete store.subscription_status
 
 			// ✅ OK — retornar apenas dados públicos
@@ -342,14 +351,14 @@ class StoreController {
 			const store = result.rows[0]
 			const hasToken = !!store.mercadopago_access_token
 
-			// 2️⃣ Abrir ou fechar automaticamente
-			if (hasToken && store.is_closed) {
-				await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
-			}
+			// // 2️⃣ Abrir ou fechar automaticamente
+			// if (hasToken && store.is_closed) {
+			// 	await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
+			// }
 
-			if (!hasToken && !store.is_closed) {
-				await turso.execute(`UPDATE stores SET is_closed = 1 WHERE id = ?`, [fk_store_id])
-			}
+			// if (!hasToken && !store.is_closed) {
+			// 	await turso.execute(`UPDATE stores SET is_closed = 1 WHERE id = ?`, [fk_store_id])
+			// }
 
 			// 3️⃣ Resposta limpa pro frontend
 			return res.json({
