@@ -6,7 +6,7 @@ import { MP_ACCESS_TOKEN } from '../config/env.js'
 const router = express.Router()
 const turso = getTursoClient()
 
-router.post('/subscriptions/subscribe', async (req, res) => {
+router.post('/api/subscriptions/subscribe', async (req, res) => {
 	try {
 		const { fk_store_id, plan_slug, payer_email, card_token_id, last_four_digits } = req.body
 
@@ -57,7 +57,7 @@ router.post('/subscriptions/subscribe', async (req, res) => {
 		res.status(500).json(err.response?.data || { error: 'Erro ao criar assinatura' })
 	}
 })
-router.get('/subscriptions/:fk_store_id', async (req, res) => {
+router.get('/api/subscriptions/:fk_store_id', async (req, res) => {
 	try {
 		const { fk_store_id } = req.params
 		// 1️⃣ Buscar subscription_id no seu banco
@@ -86,7 +86,7 @@ router.get('/subscriptions/:fk_store_id', async (req, res) => {
 		res.status(500).json(err.response?.data || { error: 'Erro ao consultar assinatura' })
 	}
 })
-router.put('/subscriptions/:fk_store_id/pause', async (req, res) => {
+router.put('/api/subscriptions/:fk_store_id/pause', async (req, res) => {
 	try {
 		const { fk_store_id } = req.params
 		// 1️⃣ Buscar subscription_id no seu banco
@@ -120,7 +120,7 @@ router.put('/subscriptions/:fk_store_id/pause', async (req, res) => {
 		res.status(500).json(err.response?.data || err)
 	}
 })
-router.put('/subscriptions/:fk_store_id/reactivate', async (req, res) => {
+router.put('/api/subscriptions/:fk_store_id/reactivate', async (req, res) => {
 	try {
 		const { fk_store_id } = req.params
 		// 1️⃣ Buscar subscription_id no seu banco
@@ -154,7 +154,7 @@ router.put('/subscriptions/:fk_store_id/reactivate', async (req, res) => {
 		res.status(500).json(err.response?.data || err)
 	}
 })
-router.put('/subscriptions/:fk_store_id/change-card', async (req, res) => {
+router.put('/api/subscriptions/:fk_store_id/change-card', async (req, res) => {
 	try {
 		const { fk_store_id } = req.params
 		const { card_token_id, last_four_digits } = req.body
@@ -197,7 +197,7 @@ router.put('/subscriptions/:fk_store_id/change-card', async (req, res) => {
 		res.status(500).json(err.response?.data || err)
 	}
 })
-router.put('/subscriptions/:fk_store_id/cancel', async (req, res) => {
+router.put('/api/subscriptions/:fk_store_id/cancel', async (req, res) => {
 	try {
 		const { fk_store_id } = req.params
 
@@ -235,7 +235,7 @@ router.put('/subscriptions/:fk_store_id/cancel', async (req, res) => {
 		res.status(500).json(err.response?.data || err)
 	}
 })
-router.put('/subscriptions/:fk_store_id/change-plan', async (req, res) => {
+router.put('/api/subscriptions/:fk_store_id/change-plan', async (req, res) => {
 	try {
 		const { fk_store_id } = req.params
 		const { new_plan_slug } = req.body
