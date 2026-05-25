@@ -135,7 +135,11 @@ class OrderController {
 						}
 					}
 
-					return {order}
+					return {
+						data: {
+							...order,
+						},
+					}
 
 					// return {
 					// 	id: order.id,
