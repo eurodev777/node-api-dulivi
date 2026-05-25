@@ -10,6 +10,7 @@ import checkPaymentStatus from '../../utils/checkPaymentStatus.js'
 import { calculateTotalOrderValue } from '../../utils/calculateTotalOrderValue.js'
 import logTamperedTotal from '../../utils/logTamperedTotal.js'
 import parseValidId from '../../utils/parseValidId.js'
+import { sendToAll } from '../../websocket.js'
 
 class OrderController {
 	// Criar um novo pedido com itens
@@ -67,6 +68,11 @@ class OrderController {
 				fk_delivery_address_id,
 				fk_user_id,
 				fk_store_id,
+			})
+
+			sendToAll({
+				type: 'NEW_ORDER',
+				order: newOrder,
 			})
 
 			const orderId = newOrder.id
@@ -267,6 +273,11 @@ class OrderController {
 
 		try {
 			const updateOrder = await orderRepository.update(id, data)
+
+			sendToAll({
+				type: 'ORDER_UPDATED',
+				order: updateOrder,
+			})
 
 			if (!updateOrder) {
 				return res.status(404).json({
