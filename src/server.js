@@ -9,15 +9,14 @@ import { initializeDatabase } from './db/db.js'
 
 const PORT = Number(process.env.PORT) || 3000
 
-// cria servidor HTTP
 const server = http.createServer(app)
 
-// websocket server
 export const wss = new WebSocketServer({ server })
 
-// conexão websocket
+const clients = new Set()
+
 wss.on('connection', (ws) => {
-	console.log('Cliente websocket conectado')
+	clients.add(ws)
 
 	ws.send(
 		JSON.stringify({
@@ -27,16 +26,26 @@ wss.on('connection', (ws) => {
 	)
 
 	ws.on('close', () => {
-		console.log('Cliente desconectado')
+		clients.delete(ws)
 	})
 })
 
+export function sendToAll(data) {
+	const message = JSON.stringify(data)
+
+	clients.forEach((client) => {
+		if (client.readyState === 1) {
+			client.send(message)
+		}
+	})
+}
+
 initializeDatabase()
-	.then(async () => {
+	.then(() => {
 		console.log('Banco de dados pronto!')
 
 		server.listen(PORT, () => {
-			console.log(`Servidor rodando em http://localhost:${PORT}`)
+			console.log(`Servidor rodando na porta ${PORT}`)
 		})
 	})
 	.catch((err) => {
