@@ -135,19 +135,21 @@ class OrderController {
 						}
 					}
 
-					return {
-						id: order.id,
-						customer_name: customerName,
-						total_amount: order.total_amount,
-						delivery_method: order.delivery_method,
-						is_scheduled: order?.is_scheduled,
-						scheduled_for: order?.scheduled_for,
-						payment_method: order.payment_method,
-						mercadopago_pay_id: order?.mercadopago_pay_id,
-						paid: order?.paid || false,
-						status: order.status,
-						created_at: order.created_at,
-					}
+					return {order}
+
+					// return {
+					// 	id: order.id,
+					// 	customer_name: customerName,
+					// 	total_amount: order.total_amount,
+					// 	delivery_method: order.delivery_method,
+					// 	is_scheduled: order?.is_scheduled,
+					// 	scheduled_for: order?.scheduled_for,
+					// 	payment_method: order.payment_method,
+					// 	mercadopago_pay_id: order?.mercadopago_pay_id,
+					// 	paid: order?.paid || false,
+					// 	status: order.status,
+					// 	created_at: order.created_at,
+					// }
 				}),
 			)
 
