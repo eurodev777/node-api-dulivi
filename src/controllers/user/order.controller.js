@@ -436,6 +436,11 @@ class OrderController {
 
 			const new_order = await orderRepository.create(payload)
 
+			sendToAll({
+				type: 'NEW_ORDER',
+				order: new_order,
+			})
+
 			const order_id = new_order.id
 			// 2. Criar itens do pedido
 			const created_items = []
