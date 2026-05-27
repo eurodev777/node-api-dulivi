@@ -132,20 +132,55 @@ router.post('/api/generate-creative-prompts', async (req, res) => {
     const cuisineTypes = ['Burgers', 'Pizza', 'Sushi', 'General Delivery', 'Açai', 'Hot Dog', 'Marmitaria', 'Italian Food'];
     const chosenCuisine = cuisineTypes[Math.floor(Math.random() * cuisineTypes.length)];
 
-    const userPrompt = `Gere uma especificação criativa de anúncio para o SaaS "Dulivi" (sistema completo de cardápio digital, robô de atendimento WhatsApp, pedidos online, teste de 15 dias grátis).
-    O foco desta arte deve ser no nicho de ${chosenCuisine} para delivery.
-    Quero receber detalhes de cores, um título alternativo chamativo em português, e um PROMPT em inglês muito bom para gerar o fundo da imagem no Pollinations AI (que gera imagens com base em texto).
-    O prompt em inglês deve pedir uma ilustração moderna minimalista ou estilo 3D de comida, com iluminação neon, sem nenhum texto escrito na imagem (importantíssimo: "no text", "no words").
+    const userPrompt = `Gere uma especificação criativa PREMIUM de anúncio para o SaaS "Dulivi".
+
+    O produto oferece:
+    - Cardápio Digital
+    - Robô de WhatsApp
+    - Sistema de pedidos online
+    - Gestão para delivery
+    - TESTE GRÁTIS POR 15 DIAS (isso é o MAIS IMPORTANTE do anúncio)
     
-    Responda estritamente em formato JSON seguindo este esquema:
+    O foco desta arte deve ser no nicho de ${chosenCuisine} para delivery.
+    
+    REGRAS IMPORTANTES:
+    - O destaque PRINCIPAL da arte deve SEMPRE ser a oferta "15 DIAS GRÁTIS"
+    - O hook deve SEMPRE complementar essa oferta
+    - TODOS os hooks devem mencionar teste grátis, 15 dias grátis, grátis ou sem custo
+    - O badge deve ser extremamente curto, forte e chamativo
+    - O badge será usado visualmente em destaque grande na imagem
+    - O hook NÃO deve competir com o badge
+    - O estilo deve parecer anúncio moderno de startup SaaS premium
+    - O tom deve gerar urgência e desejo
+    - Evite hooks genéricos
+    
+    Quero receber:
+    - Um título moderno
+    - Um hook curto e persuasivo
+    - Um badge extremamente chamativo
+    - Cores modernas
+    - Um prompt em inglês para gerar fundo visual no Pollinations AI
+    
+    O prompt da imagem deve:
+    - pedir ilustração moderna food delivery
+    - estilo 3D ou minimalista
+    - iluminação neon
+    - fundo premium
+    - sem textos escritos
+    - muito espaço vazio para adicionar textos depois
+    - visual de anúncio profissional
+    - "no text", "no words", "typography free"
+    
+    Responda STRICTAMENTE em JSON:
+    
     {
-      "title": "Título moderno secundário",
-      "hook": "Uma copy chamativa e persuasiva curta em português",
-      "badge": "Frase de destaque rápido (ex: 15 dias grátis)",
-      "accentColor": "Uma cor hex moderna para realce (ex: #FF5A1F)",
-      "bgGradientStart": "Uma cor hex escura de fundo (ex: #0F172A)",
-      "bgGradientEnd": "Uma cor hex escura complementar (ex: #1E293B)",
-      "bgImagePrompt": "Prompt em inglês focado em ilustração ou 3D de comida delivery (ex: 'A vibrant 3D rendering of a delicious burger with melting cheese, isometric minimal flat vector background, neon orange styling, high resolution, soft shadows, no text, copy space')"
+      "title": "Título moderno",
+      "hook": "Copy curta mencionando teste grátis",
+      "badge": "15 DIAS GRÁTIS",
+      "accentColor": "#FF5A1F",
+      "bgGradientStart": "#0F172A",
+      "bgGradientEnd": "#1E293B",
+      "bgImagePrompt": "Prompt em inglês"
     }`;
 
     const response = await ai.models.generateContent({
@@ -168,31 +203,31 @@ router.post('/api/generate-creative-prompts', async (req, res) => {
 
     const fallbacks = [
       {
-        title: "Dulivi Delivery",
-        hook: `Turbine suas vendas de ${fallbackCuisine} no WhatsApp!`,
-        badge: "15 Dias Grátis",
+        title: "Seu Delivery Mais Profissional",
+        hook: `Teste grátis por 15 dias e automatize seu delivery de ${fallbackCuisine}!`,
+        badge: "15 DIAS GRÁTIS",
         accentColor: "#F97316",
         bgGradientStart: "#0F172A",
         bgGradientEnd: "#1E293B",
-        bgImagePrompt: `Delicious gourmet ${fallbackCuisine} box delivery, minimalist 3D food illustration, flat design vector, high contrast, studio lighting, no text, dark background`
+        bgImagePrompt: `Premium gourmet ${fallbackCuisine} delivery scene, modern 3D food illustration, neon lighting, dark luxury background, food advertising aesthetic, empty copy space, ultra detailed, no text, no words, typography free`
       },
       {
-        title: "Cardápio Inteligente",
-        hook: "Seu cliente pede em segundos, sem pagar comissões!",
-        badge: "Teste Sem Custos",
-        accentColor: "#D97706",
+        title: "Venda Mais no WhatsApp",
+        hook: "Use grátis por 15 dias e receba pedidos automaticamente!",
+        badge: "TESTE GRÁTIS",
+        accentColor: "#22C55E",
+        bgGradientStart: "#052E16",
+        bgGradientEnd: "#14532D",
+        bgImagePrompt: "Modern smartphone food delivery interface, glowing whatsapp notifications, premium startup style, dark background, neon green lights, realistic 3D render, empty space for typography, no text"
+      },
+      {
+        title: "Cardápio Digital Inteligente",
+        hook: "15 dias grátis para transformar seu delivery hoje.",
+        badge: "SEM CUSTO",
+        accentColor: "#EAB308",
         bgGradientStart: "#1E1B4B",
         bgGradientEnd: "#312E81",
-        bgImagePrompt: "A colorful digital smartphone showing a beautiful food menu, glowing digital items floating, vector illustration, style of tech startup, dark aesthetic background, no words"
-      },
-      {
-        title: "Atendimento no Zap",
-        hook: "Robô inteligente responde e anota pedidos sozinho!",
-        badge: "Sistema Completo",
-        accentColor: "#22C55E",
-        bgGradientStart: "#022C22",
-        bgGradientEnd: "#064E3B",
-        bgImagePrompt: "Isometric illustration of green chat bubbles, delicious pizza delivery box, glowing neon green icons, flat vector style, darkness environment, copy space, no spelling"
+        bgImagePrompt: "Luxury food delivery marketing illustration, premium burger and fries composition, cinematic neon lighting, modern SaaS advertising style, dark background, clean composition, no text, no typography"
       }
     ];
 
