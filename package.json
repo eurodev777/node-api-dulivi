@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/genai": "^2.6.0",
     "@libsql/client": "^0.15.0",
     "@supabase/supabase-js": "^2.49.4",
     "axios": "^1.8.4",

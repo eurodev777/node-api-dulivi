@@ -10,3 +10,4 @@ export const MP_REDIRECT_URI = process.env.MP_REDIRECT_URI
 export const SUPABASE_API_KEY = process.env.SUPABASE_API_KEY
 export const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY
 export const JWT_SECRET = process.env.JWT_SECRET
+export const GEMINI_API_KEY = process.env.GEMINI_API_KEY

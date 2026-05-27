@@ -33,6 +33,8 @@ import { multerMiddleware, uploadImage } from '../utils/uploadImage.js'
 import { JWT_SECRET } from '../config/env.js'
 import processScheduledMessages from '../jobs/scheduler.js'
 
+import geminiRoutes from './gemini.routes.js'
+
 const router = express.Router()
 
 router.post('/api/upload', multerMiddleware, uploadImage)
@@ -80,6 +82,7 @@ router.use(mercadoPagoRoutes)
 // Plan
 router.use(planRoutes)
 router.use(subscriptionRoutes)
+router.use(geminiRoutes)
 
 router.head('/api/health', (req, res) => {
 	res.sendStatus(204);
