@@ -15,26 +15,117 @@ const ai = new GoogleGenAI({
   },
 });
 
-const BRAZIL_STATES = [
-  { name: 'São Paulo', uf: 'SP' },
-  { name: 'Rio de Janeiro', uf: 'RJ' },
-  { name: 'Minas Gerais', uf: 'MG' },
-  { name: 'Rio Grande do Sul', uf: 'RS' },
-  { name: 'Paraná', uf: 'PR' },
-  { name: 'Santa Catarina', uf: 'SC' },
-  { name: 'Bahia', uf: 'BA' },
-  { name: 'Pernambuco', uf: 'PE' },
-  { name: 'Ceará', uf: 'CE' },
-  { name: 'Goiás', uf: 'GO' },
-  { name: 'Espírito Santo', uf: 'ES' },
-  { name: 'Distrito Federal', uf: 'DF' },
-  { name: 'Maranhão', uf: 'MA' },
-  { name: 'Paraíba', uf: 'PB' },
-  { name: 'Rio Grande do Norte', uf: 'RN' },
-  { name: 'Alagoas', uf: 'AL' },
-  { name: 'Mato Grosso', uf: 'MT' },
-  { name: 'Mato Grosso do Sul', uf: 'MS' }
+const STATE_UFS = [
+  'AC',
+  'AL',
+  'AP',
+  'AM',
+  'BA',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MT',
+  'MS',
+  'MG',
+  'PA',
+  'PB',
+  'PR',
+  'PE',
+  'PI',
+  'RJ',
+  'RN',
+  'RS',
+  'RO',
+  'RR',
+  'SC',
+  'SP',
+  'SE',
+  'TO',
 ];
+
+const METRICS = [
+  'Grande potencial para delivery e restaurantes.',
+  'Alta densidade populacional e consumo digital.',
+  'Cidade forte para pizzarias e hamburguerias.',
+  'Mercado gastronômico aquecido.',
+  'Alta demanda por pedidos online.',
+  'Forte presença de delivery no WhatsApp.',
+  'Cidade com crescimento comercial acelerado.',
+  'Excelente público para cardápio digital.',
+  'Região estratégica para prospecção.',
+  'Mercado local muito ativo para alimentação.',
+  'Cidade com forte vida noturna e consumo.',
+  'Público jovem e alto uso de delivery.',
+  'Alto crescimento de restaurantes locais.',
+  'Ótimo potencial para automação de pedidos.',
+  'Economia regional forte e público consumidor.',
+];
+
+router.post('/api/generate-leads', async (req, res) => {
+  try {
+    // escolhe UF aleatória
+    const randomUF =
+      STATE_UFS[Math.floor(Math.random() * STATE_UFS.length)];
+
+    // busca dados do estado
+    const stateResponse = await fetch(
+      `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${randomUF}`
+    );
+
+    if (!stateResponse.ok) {
+      throw new Error('Erro ao buscar estado no IBGE');
+    }
+
+    const stateData = await stateResponse.json();
+
+    // busca municípios
+    const citiesResponse = await fetch(
+      `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${randomUF}/municipios`
+    );
+
+    if (!citiesResponse.ok) {
+      throw new Error('Erro ao buscar municípios no IBGE');
+    }
+
+    const citiesData = await citiesResponse.json();
+
+    // embaralha cidades
+    const shuffledCities = [...citiesData].sort(
+      () => Math.random() - 0.5
+    );
+
+    // pega 20 cidades
+    const selectedCities = shuffledCities.slice(0, 20);
+
+    // monta estrutura
+    const formattedCities = selectedCities.map((city) => ({
+      name: city.nome,
+      metric:
+        METRICS[Math.floor(Math.random() * METRICS.length)],
+    }));
+
+    return res.json({
+      success: true,
+      data: {
+        state: stateData.nome,
+        uf: stateData.sigla,
+        cities: formattedCities,
+      },
+    });
+  } catch (error) {
+    console.error('Erro generate-leads:', error);
+
+    return res.status(500).json({
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Erro interno ao gerar leads.',
+    });
+  }
+});
 
 router.post('/api/generate-creative-prompts', async (req, res) => {
   try {
@@ -107,85 +198,6 @@ router.post('/api/generate-creative-prompts', async (req, res) => {
 
     const selectedFallback = fallbacks[Math.floor(Math.random() * fallbacks.length)];
     res.json(selectedFallback);
-  }
-});
-
-router.post('/api/generate-leads', async (req, res) => {
-  try {
-    const randomStateObj =
-      BRAZIL_STATES[Math.floor(Math.random() * BRAZIL_STATES.length)];
-
-    const userPrompt = `
-Escolha o estado brasileiro "${randomStateObj.name}" (${randomStateObj.uf}).
-
-Selecione exatamente 20 cidades deste estado.
-
-Priorize cidades com:
-- alta população
-- forte mercado de delivery
-- muitas hamburguerias, pizzarias e restaurantes
-
-Para cada cidade gere:
-- nome
-- motivo curto de prospecção
-
-Responda APENAS JSON válido neste formato:
-
-{
-  "state": "Nome do Estado",
-  "uf": "SIGLA",
-  "cities": [
-    {
-      "name": "Nome da Cidade",
-      "metric": "Motivo curto"
-    }
-  ]
-}
-`;
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-lite',
-      contents: userPrompt,
-      config: {
-        responseMimeType: 'application/json',
-      },
-    });
-
-    const resultText = response.text?.trim();
-
-    if (!resultText) {
-      return res.status(500).json({
-        success: false,
-        error: 'A IA retornou uma resposta vazia.',
-      });
-    }
-
-    let parsed;
-
-    try {
-      parsed = JSON.parse(resultText);
-    } catch (parseError) {
-      console.error('Erro ao converter JSON:', resultText);
-
-      return res.status(500).json({
-        success: false,
-        error: 'A IA retornou um JSON inválido.',
-        raw: resultText,
-      });
-    }
-
-    return res.json({
-      success: true,
-      data: parsed,
-    });
-  } catch (error) {
-    console.error('Error generating leads:', error);
-
-    return res.status(500).json({
-      success: false,
-      error: error?.message || 'Erro desconhecido ao gerar leads.',
-      details: error,
-    });
   }
 });
 
