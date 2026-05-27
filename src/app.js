@@ -15,6 +15,7 @@ const urls = [
 	'http://localhost:8080', // LP development
 	'http://localhost:3000', // API development
 	'http://localhost:5173', // Dulivi development
+	'https://console-dulivi.vercel.app'
 ]
 
 export const corsOptions = {
