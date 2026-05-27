@@ -58,7 +58,7 @@ router.post('/api/generate-creative-prompts', async (req, res) => {
     }`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash-lite',
       contents: userPrompt,
       config: {
         responseMimeType: 'application/json',
@@ -144,7 +144,7 @@ Responda APENAS JSON válido neste formato:
 `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash-lite',
       contents: userPrompt,
       config: {
         responseMimeType: 'application/json',
