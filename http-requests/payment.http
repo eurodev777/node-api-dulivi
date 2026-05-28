@@ -1,25 +1,25 @@
 @baseUrl = http://localhost:3000/api
 
 ### Pagar no Crédito
-POST {{baseUrl}}/payment/credit
+POST {{baseUrl}}/payment/credit/2
 Content-Type: application/json
 
 {
-  "token": "71eda1f7383f8f15f519f1ce8ebe7d21",
-  "transaction_amount": 30.8,
+  "token": "dc8e0c217d9983847b1ee6582307505e",
+  "transaction_amount": 4,
   "cpf": "49827089838",
-  "email": "joaojpmoreira25@gmail.com",
-  "payment_method_id": "master",
-  "phone_number": "13991027026"
+  "email": "sothink.mkt@gmail.com",
+  "payment_method_id": "mastercard",
+  "phone_number": "13991028549"
 }
 ### Pagar no PIX
-POST {{baseUrl}}/payment/pix
+POST {{baseUrl}}/payment/pix/2
 Content-Type: application/json
 
 {
-  "value": 30.8,
-  "email": "joaojpmoreira25@gmail.com",
-  "phone_number": "13991027026"
+  "value": 4,
+  "email": "sothink.mkt@gmail.com",
+  "phone_number": "13991028549"
 }
 ### Status do Pagamento
 POST {{baseUrl}}/payment/status

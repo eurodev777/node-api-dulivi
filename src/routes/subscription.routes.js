@@ -5,7 +5,20 @@ import { MP_ACCESS_TOKEN } from '../config/env.js'
 
 const router = express.Router()
 const turso = getTursoClient()
+try {
+	const response = await axios.get('https://api.mercadopago.com/preapproval/search', {
+		headers: {
+			Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+		},
+	})
 
+	console.log(response.data)
+
+	res.json(response.data)
+} catch (err) {
+	console.error(err.response?.status)
+	console.error(err.response?.data)
+}
 router.post('/api/subscriptions/subscribe', async (req, res) => {
 	try {
 		const { fk_store_id, plan_slug, payer_email, card_token_id, last_four_digits } = req.body
@@ -26,7 +39,7 @@ router.post('/api/subscriptions/subscribe', async (req, res) => {
 				card_token_id,
 				external_reference: `store_${fk_store_id}`,
 				auto_recurring: {
-					transaction_amount: 1,
+					transaction_amount: plan.rows[0].price,
 					currency_id: 'BRL',
 				},
 			},

@@ -85,7 +85,7 @@ router.use(subscriptionRoutes)
 router.use(geminiRoutes)
 
 router.head('/api/health', (req, res) => {
-	res.sendStatus(204);
-});
+	res.sendStatus(204)
+})
 
 export default router

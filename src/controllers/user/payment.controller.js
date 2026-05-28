@@ -9,6 +9,7 @@ import storeRepository from '../../repositories/store/store.repository.js'
 
 import { getMercadoPagoClient } from '../../lib/mercadopago.js'
 import { api } from '../../lib/whatsapp.js'
+import { MP_ACCESS_TOKEN } from '../../config/env.js'
 
 class PaymentController {
 	// Criar cliente no Mercado Pago
@@ -88,7 +89,8 @@ class PaymentController {
 
 		try {
 			// Buscar mercadopago_access_token
-			const access_token = await await storeRepository.getToken(store_id)
+			//const access_token = await await storeRepository.getToken(store_id)
+			const access_token = MP_ACCESS_TOKEN
 			if (!access_token) return res.status(404).json({ error: 'Token não encontrado' })
 			// Gerar client
 			const client = getMercadoPagoClient(access_token)
@@ -99,6 +101,13 @@ class PaymentController {
 				email,
 				cpf,
 				payment_method_id,
+				payer: {
+					email,
+					identification: {
+						type: 'CPF',
+						number: cpf,
+					},
+				},
 			})
 
 			if (!result) {
@@ -138,16 +147,25 @@ class PaymentController {
 		}
 
 		try {
-			const access_token = await await storeRepository.getToken(store_id)
+			//const access_token = await await storeRepository.getToken(store_id)
+			const access_token = MP_ACCESS_TOKEN
 			if (!access_token) return res.status(404).json({ error: 'Token não encontrado' })
 			const client = getMercadoPagoClient(access_token)
 
 			const payment = await new Payment(client).create({
 				body: {
-					transaction_amount: value,
+					transaction_amount: Number(value),
+					description: 'Pagamento teste PIX',
+					notification_url: 'https://webhook.site/test',
 					payment_method_id: 'pix',
 					payer: {
-						email: email,
+						email,
+						first_name: 'Test',
+						last_name: 'User',
+						identification: {
+							type: 'CPF',
+							number: '11111111111',
+						},
 					},
 				},
 			})
@@ -157,10 +175,12 @@ class PaymentController {
 			}
 
 			// await api.post('/send', { phone_number, message: 'Pedido pago com sucesso' })
-
+			console.log(JSON.stringify(payment, null, 2))
 			res.send({
 				data: {
 					paymentId: payment.id,
+					orderId: payment.order?.id,
+					status: payment.status,
 					qrcode: payment.point_of_interaction.transaction_data.qr_code_base64,
 					copiaecola: payment.point_of_interaction.transaction_data.qr_code,
 				},
