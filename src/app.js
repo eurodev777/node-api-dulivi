@@ -22,7 +22,7 @@ export const corsOptions = {
 		if (!origin || allowedOrigins.includes(origin)) {
 			callback(null, true)
 		} else {
-			callback(new Error('Not allowed by CORS'))
+			callback(null, false)
 		}
 	},
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'],
@@ -32,24 +32,22 @@ export const corsOptions = {
 
 const app = express()
 
+app.disable('x-powered-by')
 app.set('trust proxy', 1)
+
 app.use(morgan('tiny'))
 app.use(cors(corsOptions))
-app.options('*', cors(corsOptions))
 app.use(
 	helmet({
-		crossOriginResourcePolicy: false,
+		crossOriginResourcePolicy: { policy: 'cross-origin' },
 	}),
 )
+
 app.use(express.json())
-app.use((req, res, next) => {
-	console.log(req.method, req.path, req.headers.origin)
-	next()
-})
 app.use(routes)
+
 app.use((err, req, res, next) => {
 	console.error(err)
-
 	res.status(500).json({
 		error: err.message || 'Internal Server Error',
 	})

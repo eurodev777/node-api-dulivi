@@ -2,6 +2,7 @@ import axios from 'axios'
 import express from 'express'
 import { getTursoClient } from '../lib/turso.js'
 import { MP_ACCESS_TOKEN } from '../config/env.js'
+import { uuidv4 } from 'zod'
 
 const router = express.Router()
 const turso = getTursoClient()
@@ -37,7 +38,7 @@ router.post('/api/subscriptions/subscribe', async (req, res) => {
 				preapproval_plan_id: plan.rows[0].mp_plan_id,
 				payer_email,
 				card_token_id,
-				external_reference: `store_${fk_store_id}`,
+				external_reference: `store_${uuidv4()}`,
 				auto_recurring: {
 					transaction_amount: plan.rows[0].price,
 					currency_id: 'BRL',

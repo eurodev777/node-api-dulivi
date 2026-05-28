@@ -160,11 +160,11 @@ class PaymentController {
 					payment_method_id: 'pix',
 					payer: {
 						email,
-						first_name: 'Test',
-						last_name: 'User',
+						first_name: 'Joao',
+						last_name: 'Paulo',
 						identification: {
 							type: 'CPF',
-							number: '11111111111',
+							number: '49827089838',
 						},
 					},
 				},
