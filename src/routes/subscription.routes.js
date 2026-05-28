@@ -32,6 +32,12 @@ router.post('/api/subscriptions/subscribe', async (req, res) => {
 		}
 
 		// 2️⃣ Criar assinatura no MercadoPago
+		console.log('Enviando preapproval:', {
+			preapproval_plan_id: plan.rows[0].mp_plan_id,
+			payer_email,
+			card_token_id,
+			auto_recurring: { transaction_amount: plan.rows[0].price, currency_id: 'BRL' },
+		})
 		const response = await axios.post(
 			'https://api.mercadopago.com/preapproval',
 			{
