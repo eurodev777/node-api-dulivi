@@ -6,7 +6,17 @@ import { uuidv4 } from 'zod'
 
 const router = express.Router()
 const turso = getTursoClient()
-
+router.get('/diagnostic', async (req, res) => {
+	try {
+		// Testar se o token tem acesso a planos
+		const plan = await axios.get(`https://api.mercadopago.com/preapproval_plan/${plan_id}`, {
+			headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
+		})
+		res.json({ plan: plan.data })
+	} catch (err) {
+		res.status(err.response?.status || 500).json(err.response?.data || err.message)
+	}
+})
 router.post('/api/subscriptions/subscribe', async (req, res) => {
 	try {
 		const { fk_store_id, plan_slug, payer_email, card_token_id, last_four_digits } = req.body
