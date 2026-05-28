@@ -2,21 +2,11 @@ import axios from 'axios'
 import express from 'express'
 import { getTursoClient } from '../lib/turso.js'
 import { MP_ACCESS_TOKEN } from '../config/env.js'
-import { uuidv4 } from 'zod'
+import { v4 as uuidv4 } from 'uuid'
 
 const router = express.Router()
 const turso = getTursoClient()
-router.get('/diagnostic', async (req, res) => {
-	try {
-		// Testar se o token tem acesso a planos
-		const plan = await axios.get(`https://api.mercadopago.com/preapproval_plan/d1213c88af7d4d168e2c00c7c0227a65`, {
-			headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
-		})
-		res.json({ plan: plan.data })
-	} catch (err) {
-		res.status(err.response?.status || 500).json(err.response?.data || err.message)
-	}
-})
+
 router.post('/api/subscriptions/subscribe', async (req, res) => {
 	try {
 		const { fk_store_id, plan_slug, payer_email, card_token_id, last_four_digits } = req.body
@@ -28,13 +18,6 @@ router.post('/api/subscriptions/subscribe', async (req, res) => {
 			return res.status(400).json({ error: 'Plano inválido' })
 		}
 
-		// 2️⃣ Criar assinatura no MercadoPago
-		console.log('Enviando preapproval:', {
-			preapproval_plan_id: plan.rows[0].mp_plan_id,
-			payer_email,
-			card_token_id,
-			auto_recurring: { transaction_amount: plan.rows[0].price, currency_id: 'BRL' },
-		})
 		const response = await axios.post(
 			'https://api.mercadopago.com/preapproval',
 			{
@@ -42,10 +25,6 @@ router.post('/api/subscriptions/subscribe', async (req, res) => {
 				payer_email,
 				card_token_id,
 				external_reference: `store_${uuidv4()}`,
-				auto_recurring: {
-					transaction_amount: plan.rows[0].price,
-					currency_id: 'BRL',
-				},
 			},
 			{
 				headers: {
