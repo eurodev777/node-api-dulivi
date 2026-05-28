@@ -6,31 +6,53 @@ import helmet from 'helmet'
 import routes from './routes/index.js'
 import './jobs/scheduler.js'
 
-const urls = [
-	// Domínios permitidos
-	'https://menu.dulivi.com.br', // Cardápio production
-	'https://painel.dulivi.com.br', // Painel production
-	'https://api.dulivi.com.br', // API production
-	'https://dulivi.com.br', // LP
-	'http://localhost:8080', // LP development
-	'http://localhost:3000', // API development
-	'http://localhost:5173', // Dulivi development
-	'https://console-dulivi.vercel.app'
+const allowedOrigins = [
+	'https://menu.dulivi.com.br',
+	'https://painel.dulivi.com.br',
+	'https://api.dulivi.com.br',
+	'https://dulivi.com.br',
+	'http://localhost:8080',
+	'http://localhost:3000',
+	'http://localhost:5173',
+	'https://console-dulivi.vercel.app',
 ]
 
 export const corsOptions = {
-	origin: urls,
-	methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD'],
+	origin: function (origin, callback) {
+		if (!origin || allowedOrigins.includes(origin)) {
+			callback(null, true)
+		} else {
+			callback(new Error('Not allowed by CORS'))
+		}
+	},
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'],
 	allowedHeaders: ['Content-Type', 'Authorization'],
 	credentials: true,
 }
 
 const app = express()
 
+app.set('trust proxy', 1)
 app.use(morgan('tiny'))
 app.use(cors(corsOptions))
-app.use(helmet())
+app.options('*', cors(corsOptions))
+app.use(
+	helmet({
+		crossOriginResourcePolicy: false,
+	}),
+)
 app.use(express.json())
+app.use((req, res, next) => {
+	console.log(req.method, req.path, req.headers.origin)
+	next()
+})
 app.use(routes)
+app.use((err, req, res, next) => {
+	console.error(err)
+
+	res.status(500).json({
+		error: err.message || 'Internal Server Error',
+	})
+})
 
 export default app
