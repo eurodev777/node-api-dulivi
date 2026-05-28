@@ -9,7 +9,7 @@ const turso = getTursoClient()
 router.get('/diagnostic', async (req, res) => {
 	try {
 		// Testar se o token tem acesso a planos
-		const plan = await axios.get(`https://api.mercadopago.com/preapproval_plan/${plan_id}`, {
+		const plan = await axios.get(`https://api.mercadopago.com/preapproval_plan/d1213c88af7d4d168e2c00c7c0227a65`, {
 			headers: { Authorization: `Bearer ${MP_ACCESS_TOKEN}` },
 		})
 		res.json({ plan: plan.data })
