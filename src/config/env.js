@@ -13,5 +13,5 @@ export const JWT_SECRET = process.env.JWT_SECRET
 export const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 // PAGAMENTOS
 export const ASAAS_API_KEY = process.env.ASAAS_API_KEY
-export const ASAAS_BASE_URL =
-	process.env.NODE_ENV === 'production' ? 'https://api.asaas.com/v3' : 'https://api-sandbox.asaas.com/v3'
+export const ASAAS_BASE_URL = 'https://api-sandbox.asaas.com/v3'
+// process.env.NODE_ENV === 'production' ? 'https://api.asaas.com/v3' : 'https://api-sandbox.asaas.com/v3'
