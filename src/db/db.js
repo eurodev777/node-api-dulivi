@@ -20,18 +20,18 @@ export const initializeDatabase = async () => {
 			console.log('🔰 Inserindo loja padrão...')
 			await turso.execute({
 				sql: `
-					INSERT INTO stores (name, email, password, image, minimum_order, delivery_time_min, delivery_time_max, store_location)
+					INSERT INTO stores (name, email, password, cpf, image, minimum_order, delivery_time_min, delivery_time_max)
 					VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 				`,
 				args: [
 					"Nabih Esfiha's",
-					'joaojpmoreira25@gmail.com.br',
+					'joaojpmoreira25@gmail.com',
 					'senha123',
+					'49827089838',
 					'https://firebasestorage.googleapis.com/v0/b/brendi-app.appspot.com/o/public%2Fstores%2FiDKFcEEXl3yffAobBax8%2Fimages%2Flogos%2FiDKFcEEXl3yffAobBax8.jpeg?alt=media&token=e4e73f0a-c4bf-47f1-929d-7856302e6192',
 					15.0,
 					30,
 					80,
-					'Mongaguá - SP',
 				],
 			})
 			console.log('✅ Loja padrão inserida!')

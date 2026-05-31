@@ -5,21 +5,21 @@ POST {{baseUrl}}/payment/credit/2
 Content-Type: application/json
 
 {
-  "token": "dc8e0c217d9983847b1ee6582307505e",
-  "transaction_amount": 4,
-  "cpf": "49827089838",
-  "email": "sothink.mkt@gmail.com",
-  "payment_method_id": "mastercard",
-  "phone_number": "13991028549"
+  "token": "fd8053b808621611bf9218b910cee9f9",
+  "transaction_amount": 11,
+  "cpf": "11111111111",
+  "email": "test_user_3002476540834704694@testuser.com",
+  "payment_method_id": "visa",
+  "phone_number": "0111111111"
 }
 ### Pagar no PIX
 POST {{baseUrl}}/payment/pix/2
 Content-Type: application/json
 
 {
-  "value": 4,
-  "email": "sothink.mkt@gmail.com",
-  "phone_number": "13991028549"
+  "value": 11,
+  "email": "test_user_3002476540834704694@testuser.com",
+  "phone_number": "0111111111"
 }
 ### Status do Pagamento
 POST {{baseUrl}}/payment/status

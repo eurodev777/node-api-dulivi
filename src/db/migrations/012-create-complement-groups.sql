@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS complement_groups (
     title TEXT NOT NULL,
     option_minimum INTEGER DEFAULT 0,
     option_limit INTEGER DEFAULT 20,
-    option_minimum INTEGER DEFAULT 0,
     multiple_selection INTEGER DEFAULT 0,
     is_combo_group INTEGER DEFAULT 0,
     required INTEGER DEFAULT 0,

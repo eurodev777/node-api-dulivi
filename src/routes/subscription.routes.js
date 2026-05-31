@@ -1,295 +1,255 @@
-import axios from 'axios'
 import express from 'express'
 import { getTursoClient } from '../lib/turso.js'
-import { MP_ACCESS_TOKEN } from '../config/env.js'
-import { v4 as uuidv4 } from 'uuid'
+import { asaas } from '../lib/asaas.js'
+import { paymentLimiter } from '../middlewares/paymentLimiter.js'
 
 const router = express.Router()
 const turso = getTursoClient()
 
-router.post('/api/subscriptions/subscribe', async (req, res) => {
+const PLANS = {
+	dulivi_plan_start: {
+		name: 'dulivi_plan_start',
+		price: 89.9,
+	},
+
+	dulivi_plan_pro: {
+		name: 'dulivi_plan_pro',
+		price: 139.9,
+	},
+
+	dulivi_plan_turbo: {
+		name: 'dulivi_plan_turbo',
+		price: 249.9,
+	},
+}
+
+//ROTA DE ASSINAR
+router.post('/api/subscriptions/subscribe', paymentLimiter, async (req, res) => {
 	try {
-		const { fk_store_id, plan_slug, payer_email, card_token_id, last_four_digits } = req.body
+		const {
+			fk_store_id,
+			plan_slug,
 
-		// 1️⃣ Buscar plano
-		const plan = await turso.execute(`SELECT mp_plan_id, price FROM plans WHERE slug = ?`, [plan_slug])
+			name,
+			email,
+			cpfCnpj,
 
-		if (!plan.rows.length) {
-			return res.status(400).json({ error: 'Plano inválido' })
+			postalCode,
+			addressNumber = 123,
+			phone,
+
+			card_holder_name,
+			card_number,
+			card_expiry_month,
+			card_expiry_year,
+			card_ccv,
+		} = req.body
+		const nextDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+		const formattedNextDueDate = nextDueDate.toISOString().slice(0, 10)
+		const plan = PLANS[plan_slug]
+
+		if (!plan) {
+			return res.status(400).json({
+				error: 'Plano inválido',
+			})
 		}
 
-		const response = await axios.post(
-			'https://api.mercadopago.com/preapproval',
-			{
-				preapproval_plan_id: plan.rows[0].mp_plan_id,
-				payer_email,
-				card_token_id,
-				external_reference: `store_${uuidv4()}`,
-			},
-			{
-				headers: {
-					Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-					'Content-Type': 'application/json',
-				},
-			},
-		)
+		// 2️⃣ Criar customer
+		const customerResponse = await asaas.post('/customers', {
+			name,
+			email,
+			cpfCnpj,
+		})
 
-		// 3️⃣ Atualizar store
+		const customer = customerResponse.data
+
+		// 3️⃣ Criar assinatura
+		const subscriptionResponse = await asaas.post('/subscriptions', {
+			customer: customer.id,
+
+			billingType: 'CREDIT_CARD',
+
+			value: plan.price,
+
+			nextDueDate: formattedNextDueDate,
+
+			cycle: 'MONTHLY',
+
+			description: plan.name,
+
+			creditCard: {
+				holderName: card_holder_name,
+				number: card_number,
+				expiryMonth: card_expiry_month,
+				expiryYear: card_expiry_year,
+				ccv: card_ccv,
+			},
+
+			creditCardHolderInfo: {
+				name,
+				email,
+				cpfCnpj,
+				postalCode,
+				addressNumber,
+				phone,
+			},
+		})
+
+		const subscription = subscriptionResponse.data
+
+		// 4️⃣ Salvar no banco
 		await turso.execute(
 			`
 			UPDATE stores
-			SET subscription_id = ?,
-			    subscription_status = ?,
-			    plan = ?,
-			    last_four_digits = ?
+			SET
+				asaas_customer_id = ?,
+				subscription_id = ?,
+				subscription_status = ?,
+				plan = ?,
+				last_four_digits = ?
 			WHERE id = ?
 			`,
-			[response.data.id, response.data.status, plan_slug, last_four_digits, fk_store_id],
+			[customer.id, subscription.id, subscription.status, plan_slug, card_number.slice(-4), fk_store_id],
 		)
 
-		res.json(response.data)
-	} catch (err) {
-		console.error(err.response?.data || err)
-		res.status(500).json(err.response?.data || { error: 'Erro ao criar assinatura' })
-	}
-})
-router.get('/api/subscriptions/:fk_store_id', async (req, res) => {
-	try {
-		const { fk_store_id } = req.params
-		// 1️⃣ Buscar subscription_id no seu banco
-		const result = await turso.execute(
-			`SELECT subscription_id, subscription_status, plan 
-       FROM stores WHERE id = ?`,
-			[fk_store_id],
-		)
-
-		if (!result.rows.length || !result.rows[0].subscription_id) {
-			return res.status(404).json({ error: 'Assinatura não encontrada' })
-		}
-
-		const subscriptionId = result.rows[0].subscription_id
-		// 2️⃣ Consultar Mercado Pago (TOKEN DA PLATAFORMA)
-		const response = await axios.get(`https://api.mercadopago.com/preapproval/${subscriptionId}`, {
-			headers: {
-				Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-				'Content-Type': 'application/json',
-			},
-		})
-
-		res.json(response.data)
-	} catch (err) {
-		console.error(err.response?.data || err)
-		res.status(500).json(err.response?.data || { error: 'Erro ao consultar assinatura' })
-	}
-})
-router.put('/api/subscriptions/:fk_store_id/pause', async (req, res) => {
-	try {
-		const { fk_store_id } = req.params
-		// 1️⃣ Buscar subscription_id no seu banco
-		const result = await turso.execute(
-			`SELECT subscription_id, subscription_status, plan 
-       FROM stores WHERE id = ?`,
-			[fk_store_id],
-		)
-		if (!result.rows.length || !result.rows[0].subscription_id) {
-			return res.status(404).json({ error: 'Assinatura não encontrada' })
-		}
-		const subscriptionId = result.rows[0].subscription_id
-
-		const response = await axios.put(
-			`https://api.mercadopago.com/preapproval/${subscriptionId}`,
-			{ status: 'paused' },
-			{
-				headers: {
-					Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-					'Content-Type': 'application/json',
-				},
-			},
-		)
-
-		await turso.execute(`UPDATE stores SET subscription_status = 'paused' WHERE subscription_id = ?`, [
-			subscriptionId,
-		])
-
-		res.json(response.data)
-	} catch (err) {
-		res.status(500).json(err.response?.data || err)
-	}
-})
-router.put('/api/subscriptions/:fk_store_id/reactivate', async (req, res) => {
-	try {
-		const { fk_store_id } = req.params
-		// 1️⃣ Buscar subscription_id no seu banco
-		const result = await turso.execute(
-			`SELECT subscription_id, subscription_status, plan 
-       FROM stores WHERE id = ?`,
-			[fk_store_id],
-		)
-		if (!result.rows.length || !result.rows[0].subscription_id) {
-			return res.status(404).json({ error: 'Assinatura não encontrada' })
-		}
-		const subscriptionId = result.rows[0].subscription_id
-
-		const response = await axios.put(
-			`https://api.mercadopago.com/preapproval/${subscriptionId}`,
-			{ status: 'authorized' },
-			{
-				headers: {
-					Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-					'Content-Type': 'application/json',
-				},
-			},
-		)
-
-		await turso.execute(`UPDATE stores SET subscription_status = 'authorized' WHERE subscription_id = ?`, [
-			subscriptionId,
-		])
-
-		res.json(response.data)
-	} catch (err) {
-		res.status(500).json(err.response?.data || err)
-	}
-})
-router.put('/api/subscriptions/:fk_store_id/change-card', async (req, res) => {
-	try {
-		const { fk_store_id } = req.params
-		const { card_token_id, last_four_digits } = req.body
-
-		if (!card_token_id) {
-			return res.status(400).json({ error: 'card_token_id é obrigatório' })
-		}
-
-		const store = await turso.execute(
-			`SELECT subscription_id, subscription_status, plan 
-       FROM stores WHERE id = ?`,
-			[fk_store_id],
-		)
-		if (!store.rows.length || !store.rows[0].subscription_id) {
-			return res.status(404).json({ error: 'Assinatura não encontrada' })
-		}
-		const subscriptionId = store.rows[0].subscription_id
-
-		const response = await axios.put(
-			`https://api.mercadopago.com/preapproval/${subscriptionId}`,
-			{
-				card_token_id: card_token_id,
-			},
-			{
-				headers: {
-					Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-					'Content-Type': 'application/json',
-				},
-			},
-		)
-
-		await turso.execute(`UPDATE stores SET last_four_digits = ? WHERE id = ?`, [last_four_digits, fk_store_id])
-
-		res.json({
-			success: true,
-			payment_method: response.data.payment_method_id,
-			card_id: response.data.card_id,
-		})
-	} catch (err) {
-		res.status(500).json(err.response?.data || err)
-	}
-})
-router.put('/api/subscriptions/:fk_store_id/cancel', async (req, res) => {
-	try {
-		const { fk_store_id } = req.params
-
-		const store = await turso.execute(
-			`SELECT subscription_id, subscription_status, plan 
-       FROM stores WHERE id = ?`,
-			[fk_store_id],
-		)
-		if (!store.rows.length || !store.rows[0].subscription_id) {
-			return res.status(404).json({ error: 'Assinatura não encontrada' })
-		}
-		const subscriptionId = store.rows[0].subscription_id
-
-		const response = await axios.put(
-			`https://api.mercadopago.com/preapproval/${subscriptionId}`,
-			{ status: 'cancelled' },
-			{
-				headers: {
-					Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-					'Content-Type': 'application/json',
-				},
-			},
-		)
-
-		await turso.execute(
-			`UPDATE stores 
-   SET 
-     subscription_status = 'cancelled',
-     first_subscription_at = NULL
-   WHERE subscription_id = ?`,
-			[subscriptionId],
-		)
-		res.json({ success: true, status: response.data.status })
-	} catch (err) {
-		res.status(500).json(err.response?.data || err)
-	}
-})
-router.put('/api/subscriptions/:fk_store_id/change-plan', async (req, res) => {
-	try {
-		const { fk_store_id } = req.params
-		const { new_plan_slug } = req.body
-
-		if (!fk_store_id || !new_plan_slug) {
-			return res.status(400).json({ error: 'Dados obrigatórios ausentes' })
-		}
-		// 1️⃣ Buscar loja e assinatura atual
-		const store = await turso.execute(`SELECT subscription_id, plan FROM stores WHERE id = ?`, [fk_store_id])
-		if (!store.rows.length || !store.rows[0].subscription_id) {
-			return res.status(400).json({ error: 'Assinatura não encontrada' })
-		}
-		const subscriptionId = store.rows[0].subscription_id
-		// 2️⃣ Buscar novo plano
-		const plan = await turso.execute(`SELECT price, name FROM plans WHERE slug = ?`, [new_plan_slug])
-
-		if (!plan.rows.length) {
-			return res.status(400).json({ error: 'Plano inválido' })
-		}
-
-		// 3️⃣ Atualizar assinatura no Mercado Pago
-		const response = await axios.put(
-			`https://api.mercadopago.com/preapproval/${subscriptionId}`,
-			{
-				reason: `Plano ${plan.rows[0].name} - Dulivi Cardápio Digital`,
-				auto_recurring: {
-					transaction_amount: plan.rows[0].price,
-					currency_id: 'BRL',
-				},
-			},
-			{
-				headers: {
-					Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
-					'Content-Type': 'application/json',
-				},
-			},
-		)
-
-		// 4️⃣ Atualizar banco
-		await turso.execute(
-			`UPDATE stores 
-       SET plan = ?, subscription_status = ?
-       WHERE id = ?`,
-			[new_plan_slug, response.data.status, fk_store_id],
-		)
-
-		return res.json({
-			success: true,
-			message: 'Plano alterado com sucesso',
-			subscription: response.data,
-		})
+		return res.json(subscription)
 	} catch (err) {
 		console.error(err.response?.data || err)
 
 		return res.status(500).json({
-			error: 'Erro ao trocar plano',
+			error: 'Erro ao criar assinatura',
 			details: err.response?.data,
 		})
+	}
+})
+// CONSULTAR ASSINATURA
+router.get('/api/subscriptions/:fk_store_id', paymentLimiter, async (req, res) => {
+	try {
+		const { fk_store_id } = req.params
+
+		const store = await turso.execute(`SELECT subscription_id FROM stores WHERE id = ?`, [fk_store_id])
+
+		if (!store.rows.length) {
+			return res.status(404).json({
+				error: 'Assinatura não encontrada',
+			})
+		}
+
+		const subscriptionId = store.rows[0].subscription_id
+
+		const response = await asaas.get(`/subscriptions/${subscriptionId}`)
+
+		return res.json(response.data)
+	} catch (err) {
+		return res.status(500).json(
+			err.response?.data || {
+				error: 'Erro ao buscar assinatura',
+			},
+		)
+	}
+})
+// VERIFICAR PAGAMENTOS DA ASSINATURA
+router.get('/api/subscriptions/:fk_store_id/payments', paymentLimiter, async (req, res) => {
+	try {
+		const { fk_store_id } = req.params
+
+		const store = await turso.execute(`SELECT subscription_id FROM stores WHERE id = ?`, [fk_store_id])
+
+		if (!store.rows.length) {
+			return res.status(404).json({
+				error: 'Assinatura não encontrada',
+			})
+		}
+
+		const subscriptionId = store.rows[0].subscription_id
+
+		const response = await asaas.get('/payments', {
+			params: {
+				subscription: subscriptionId,
+			},
+		})
+
+		return res.json(response.data)
+	} catch (err) {
+		return res.status(500).json(err.response?.data || err)
+	}
+})
+// ALTERAR PLANO
+router.post('/api/subscriptions/:fk_store_id/change-plan', paymentLimiter, async (req, res) => {
+	try {
+		const { fk_store_id } = req.params
+		const { new_plan_slug } = req.body
+
+		const store = await turso.execute(`SELECT subscription_id FROM stores WHERE id = ?`, [fk_store_id])
+
+		if (!store.rows.length) {
+			return res.status(404).json({
+				error: 'Assinatura não encontrada',
+			})
+		}
+
+		const subscriptionId = store.rows[0].subscription_id
+
+		const plan = PLANS[new_plan_slug]
+
+		if (!plan) {
+			return res.status(400).json({
+				error: 'Plano inválido',
+			})
+		}
+
+		const response = await asaas.post(`/subscriptions/${subscriptionId}`, {
+			value: plan.price,
+			description: plan.name,
+		})
+
+		await turso.execute(
+			`
+			UPDATE stores
+			SET plan = ?
+			WHERE id = ?
+			`,
+			[new_plan_slug, fk_store_id],
+		)
+
+		return res.json(response.data)
+	} catch (err) {
+		return res.status(500).json(err.response?.data || err)
+	}
+})
+// CANCELAR ASSINATURA
+router.delete('/api/subscriptions/:fk_store_id', paymentLimiter, async (req, res) => {
+	try {
+		const { fk_store_id } = req.params
+
+		const store = await turso.execute(`SELECT subscription_id FROM stores WHERE id = ?`, [fk_store_id])
+
+		if (!store.rows.length) {
+			return res.status(404).json({
+				error: 'Assinatura não encontrada',
+			})
+		}
+
+		const subscriptionId = store.rows[0].subscription_id
+
+		await asaas.delete(`/subscriptions/${subscriptionId}`)
+
+		await turso.execute(
+			`
+			UPDATE stores
+			SET
+				subscription_status = 'cancelled',
+				subscription_id = NULL
+			WHERE id = ?
+			`,
+			[fk_store_id],
+		)
+
+		return res.json({
+			success: true,
+		})
+	} catch (err) {
+		return res.status(500).json(err.response?.data || err)
 	}
 })
 

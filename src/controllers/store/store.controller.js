@@ -1,14 +1,13 @@
 import storeRepository from '../../repositories/store/store.repository.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import { JWT_SECRET, MP_ACCESS_TOKEN } from '../../config/env.js'
-import axios from 'axios'
+import { JWT_SECRET } from '../../config/env.js'
 import { getTursoClient } from '../../lib/turso.js'
+import { asaas } from '../../lib/asaas.js'
 
 const turso = getTursoClient()
 
 const SECRET = JWT_SECRET
-const mpAccessToken = MP_ACCESS_TOKEN
 
 class StoreController {
 	// Cadastrar nova loja
@@ -125,11 +124,12 @@ class StoreController {
 			delete store.password
 			delete store.cpf
 			delete store.email
-			delete store.mercadopago_access_token
-			delete store.mercadopago_refresh_token
+			delete store.asaas_access_token
 			delete store.subscription_id
 			delete store.subscription_expires_at
 			delete store.subscription_status
+			delete store.asaas_customer_id
+			delete store.last_four_digits
 
 			//Retorno da API
 			res.status(200).json({
@@ -167,7 +167,7 @@ class StoreController {
 
 			// Remove dados sensíveis antes de enviar ao cliente
 			delete updateStore?.password
-			delete updateStore?.mercadopago_access_token
+			delete updateStore?.asaas_access_token
 
 			res.status(200).json({
 				success: true,
@@ -198,7 +198,7 @@ class StoreController {
 				})
 			}
 
-			// 2️⃣ Validar config Mercado Pago
+			// 2️⃣ Validar config Asaas
 			if (!store.subscription_id) {
 				return res.status(403).json({
 					success: false,
@@ -206,15 +206,11 @@ class StoreController {
 				})
 			}
 
-			// 3️⃣ Validar assinatura no Mercado Pago
+			// 3️⃣ Validar assinatura no Asaas
 			try {
-				const response = await axios.get(`https://api.mercadopago.com/preapproval/${store.subscription_id}`, {
-					headers: {
-						Authorization: `Bearer ${mpAccessToken}`,
-					},
-				})
+				const response = await asaas.get(`/subscriptions/${store.subscription_id}`)
 
-				if (response.data.status !== 'authorized') {
+				if (response.data.status !== 'ACTIVE') {
 					return res.status(403).json({
 						success: false,
 						error: 'STORE_INACTIVE',
@@ -230,11 +226,12 @@ class StoreController {
 			delete store.password
 			delete store.cpf
 			delete store.email
-			delete store.mercadopago_access_token
-			delete store.mercadopago_refresh_token
+			delete store.asaas_access_token
 			delete store.subscription_id
 			delete store.subscription_expires_at
 			delete store.subscription_status
+			delete store.asaas_customer_id
+			delete store.last_four_digits
 
 			// ✅ OK — retornar apenas dados públicos
 			res.json({
@@ -253,8 +250,6 @@ class StoreController {
 	}
 	// Buscar status da loja
 	async getStoreStatus(req, res) {
-		const mpAccessToken = MP_ACCESS_TOKEN
-
 		try {
 			const { fk_store_id } = req.params
 
@@ -283,7 +278,7 @@ class StoreController {
 			 */
 			if (freeTrial && trialEndsAt) {
 				if (now < trialEndsAt) {
-					if (store.is_closed === 1) {
+					if (Number(store.is_closed) === 1) {
 						await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
 					}
 
@@ -300,17 +295,15 @@ class StoreController {
 			 * 2️⃣ ASSINATURA
 			 */
 			if (store.subscription_id) {
-				const response = await axios.get(`https://api.mercadopago.com/preapproval/${store.subscription_id}`, {
-					headers: {
-						Authorization: `Bearer ${mpAccessToken}`,
-						'Content-Type': 'application/json',
-					},
-				})
+				const response = await asaas.get(`/subscriptions/${store.subscription_id}`)
 
 				const subscription = response.data
 
-				if (subscription.status === 'authorized') {
-					if (store.is_closed === 1) {
+				if (
+					subscription.deleted === false &&
+					(subscription.status === 'ACTIVE' || subscription.status === 'AUTHORIZATION_PENDING')
+				) {
+					if (Number(store.is_closed) === 1) {
 						await turso.execute(`UPDATE stores SET is_closed = 0 WHERE id = ?`, [fk_store_id])
 					}
 
@@ -319,7 +312,7 @@ class StoreController {
 
 				await turso.execute(`UPDATE stores SET is_closed = 1 WHERE id = ?`, [fk_store_id])
 
-				return res.json({ active: false, reason: subscription.status })
+				return res.json({ active: false, reason: subscription?.status })
 			}
 
 			/**
@@ -333,14 +326,14 @@ class StoreController {
 			return res.status(500).json({ error: 'Erro ao verificar status da loja' })
 		}
 	}
-	// Verificar status do Mercado Pago
+	// Verificar status do Asaas
 	async checkMercadoPagoStatus(req, res) {
 		try {
 			const { fk_store_id } = req.params
 
 			// 1️⃣ Buscar dados da loja
 			const result = await turso.execute(
-				`SELECT id, is_closed, mercadopago_access_token 
+				`SELECT id, is_closed, asaas_access_token 
        FROM stores 
        WHERE id = ?`,
 				[fk_store_id],
@@ -351,7 +344,7 @@ class StoreController {
 			}
 
 			const store = result.rows[0]
-			const hasToken = !!store.mercadopago_access_token
+			const hasToken = !!store.asaas_access_token
 
 			// // 2️⃣ Abrir ou fechar automaticamente
 			// if (hasToken && store.is_closed) {
@@ -369,8 +362,8 @@ class StoreController {
 				showWarning: !hasToken,
 			})
 		} catch (err) {
-			console.error('Erro ao checar Mercado Pago:', err)
-			return res.status(500).json({ error: 'Erro ao verificar status do Mercado Pago' })
+			console.error('Erro ao checar Asaas:', err)
+			return res.status(500).json({ error: 'Erro ao verificar status do Asaas' })
 		}
 	}
 }

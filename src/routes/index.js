@@ -23,9 +23,6 @@ import contactGroupRoutes from './contactGroup.routes.js'
 import messageRoutes from './message.routes.js'
 // External APIs Services
 import ibgeRoutes from './ibge.routes.js'
-import mercadoPagoRoutes from './mercadoPago.routes.js'
-// Plan
-import planRoutes from './plan.routes.js'
 // Subscription
 import subscriptionRoutes from './subscription.routes.js'
 // Upload Image
@@ -78,9 +75,6 @@ router.use(contactGroupRoutes)
 router.use(messageRoutes)
 // External APIs Services
 router.use(ibgeRoutes)
-router.use(mercadoPagoRoutes)
-// Plan
-router.use(planRoutes)
 router.use(subscriptionRoutes)
 router.use(geminiRoutes)
 
