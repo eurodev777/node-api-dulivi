@@ -6,7 +6,8 @@ const turso = getTursoClient()
 
 class StoreRepository {
 	async create(storeData) {
-		const { name, email, password, image, phone, cpf, trial_ends_at } = storeData
+		const { name, email, password, phone, cpf, trial_ends_at } = storeData
+		const image = '/assets/image.png'
 		const slug = await this.generateUniqueSlug(name)
 
 		try {
