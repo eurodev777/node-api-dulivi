@@ -25,7 +25,7 @@ class StoreRepository {
 					minimum_order, 
 					default_delivery_fee,
 					delivery_time_min,
-					delivery_time_max
+					delivery_time_max,
 					store_state
 				) VALUES (
 					?, ?, ?, ?, ?, ?, ?, ?, 1, 20, 7, 60, 120, 'SP'
