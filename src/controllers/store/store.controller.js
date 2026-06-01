@@ -185,10 +185,10 @@ class StoreController {
 	}
 	// Buscar loja por slug (público)
 	async getPublicBySlug(req, res) {
-		const { slug } = req.params
-
 		try {
-			// 1️⃣ Buscar loja
+			const { slug } = req.params
+
+			// Buscar loja
 			const store = await storeRepository.getBySlug(slug)
 
 			if (!store) {
@@ -198,29 +198,40 @@ class StoreController {
 				})
 			}
 
-			// 2️⃣ Validar config Asaas
-			if (!store.subscription_id) {
+			const now = Date.now()
+			const freeTrial = Number(store.free_trial) === 1
+			const trialEndsAt = Number(store.trial_ends_at)
+
+			const trialActive = freeTrial && trialEndsAt && now < trialEndsAt
+
+			// Se não tiver trial ativo e não tiver assinatura
+			if (!trialActive && !store.subscription_id) {
 				return res.status(403).json({
 					success: false,
 					error: 'STORE_INACTIVE',
 				})
 			}
 
-			// 3️⃣ Validar assinatura no Asaas
-			try {
-				const response = await asaas.get(`/subscriptions/${store.subscription_id}`)
+			// Validar assinatura apenas se não estiver em trial
+			if (!trialActive) {
+				try {
+					const response = await asaas.get(`/subscriptions/${store.subscription_id}`)
 
-				if (response.data.status !== 'ACTIVE') {
+					if (
+						response.data.deleted ||
+						(response.data.status !== 'ACTIVE' && response.data.status !== 'AUTHORIZATION_PENDING')
+					) {
+						return res.status(403).json({
+							success: false,
+							error: 'STORE_INACTIVE',
+						})
+					}
+				} catch {
 					return res.status(403).json({
 						success: false,
 						error: 'STORE_INACTIVE',
 					})
 				}
-			} catch {
-				return res.status(403).json({
-					success: false,
-					error: 'STORE_INACTIVE',
-				})
 			}
 
 			delete store.password
@@ -233,16 +244,14 @@ class StoreController {
 			delete store.asaas_customer_id
 			delete store.last_four_digits
 
-			// ✅ OK — retornar apenas dados públicos
-			res.json({
+			return res.json({
 				success: true,
-				data: {
-					...store,
-				},
+				data: store,
 			})
 		} catch (err) {
 			console.error(err)
-			res.status(500).json({
+
+			return res.status(500).json({
 				success: false,
 				error: 'INTERNAL_ERROR',
 			})
