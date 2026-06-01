@@ -6,22 +6,7 @@ const turso = getTursoClient()
 
 class StoreRepository {
 	async create(storeData) {
-		const {
-			name,
-			email,
-			password,
-			image,
-			phone,
-			cpf,
-			trial_ends_at,
-			minimum_order,
-			default_delivery_fee,
-			delivery_time_min,
-			delivery_time_max,
-			open_time,
-			close_time,
-			store_location,
-		} = storeData
+		const { name, email, password, image, phone, cpf, trial_ends_at } = storeData
 		const slug = await this.generateUniqueSlug(name)
 
 		try {
@@ -35,36 +20,11 @@ class StoreRepository {
 					cpf,
 					slug,
 					trial_ends_at,
-					minimum_order,
-					default_delivery_fee,
-					delivery_time_min,
-					delivery_time_max,
-					open_time,
-					close_time,
-					store_location,
-					subscription_status,
-					subscription_expires_at,
 					free_trial
 				) VALUES (
-					?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', DATETIME('now', '+15 days'), 1
+					?, ?, ?, ?, ?, ?, ?, ?, 1
 				) RETURNING *`,
-				[
-					name,
-					email,
-					password,
-					image || '/assets/image.png',
-					phone || null,
-					cpf || null,
-					slug,
-					trial_ends_at,
-					minimum_order || 15,
-					default_delivery_fee || 5,
-					delivery_time_min || 90,
-					delivery_time_max || 120,
-					open_time || '18:00',
-					close_time || '22:00',
-					store_location || 'São Paulo, SP',
-				],
+				[name, email, password, image || '/assets/image.png', phone || null, cpf || null, slug, trial_ends_at],
 			)
 			return result.rows[0]
 		} catch (error) {
