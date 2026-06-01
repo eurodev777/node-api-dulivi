@@ -21,9 +21,13 @@ class StoreRepository {
 					cpf,
 					slug,
 					trial_ends_at,
-					free_trial
+					free_trial,
+					minimum_order,
+					default_delivery_fee,
+					delivery_time_min,
+					delivery_time_max
 				) VALUES (
-					?, ?, ?, ?, ?, ?, ?, ?, 1
+					?, ?, ?, ?, ?, ?, ?, ?, 1, 20, 7, 60, 120
 				) RETURNING *`,
 				[name, email, password, image || '/assets/image.png', phone || null, cpf || null, slug, trial_ends_at],
 			)
