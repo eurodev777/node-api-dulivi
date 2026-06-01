@@ -10,7 +10,7 @@ class StoryDayRepository {
 			const result = await turso.execute(
 				`INSERT INTO store_days (weekday, is_open, fk_store_id) 
          VALUES (?, ?, ?) RETURNING *`,
-				[weekday, is_open, fk_store_id]
+				[weekday, is_open, fk_store_id],
 			)
 			//Retorno
 			return result.rows[0]
@@ -29,7 +29,7 @@ class StoryDayRepository {
          ON CONFLICT(weekday, fk_store_id)
          DO UPDATE SET is_open = excluded.is_open
          RETURNING *;`,
-				[weekday, is_open, fk_store_id]
+				[weekday, is_open, fk_store_id],
 			)
 			return result.rows?.[0] ?? null
 		} catch (error) {

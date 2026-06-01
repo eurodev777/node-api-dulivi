@@ -1,4 +1,5 @@
 import storeRepository from '../../repositories/store/store.repository.js'
+import storyDayRepository from '../../repositories/store/storeDays.repository.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import { JWT_SECRET } from '../../config/env.js'
@@ -28,6 +29,17 @@ class StoreController {
 				cpf,
 				trial_ends_at: trialEndsAt,
 			})
+
+			// Cria os 7 dias da semana abertos por padrão
+			await Promise.all(
+				Array.from({ length: 7 }, (_, weekday) =>
+					storyDayRepository.upsert(newStore.id, {
+						weekday,
+						is_open: 1,
+					}),
+				),
+			)
+
 			//Retorno da API
 			res.status(200).json({
 				success: true,

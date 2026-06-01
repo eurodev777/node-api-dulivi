@@ -22,12 +22,13 @@ class StoreRepository {
 					slug,
 					trial_ends_at,
 					free_trial,
-					minimum_order,
+					minimum_order, 
 					default_delivery_fee,
 					delivery_time_min,
 					delivery_time_max
+					store_state
 				) VALUES (
-					?, ?, ?, ?, ?, ?, ?, ?, 1, 20, 7, 60, 120
+					?, ?, ?, ?, ?, ?, ?, ?, 1, 20, 7, 60, 120, 'SP'
 				) RETURNING *`,
 				[name, email, password, image || '/assets/image.png', phone || null, cpf || null, slug, trial_ends_at],
 			)
