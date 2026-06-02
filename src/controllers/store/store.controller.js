@@ -249,7 +249,6 @@ class StoreController {
 			delete store.password
 			delete store.cpf
 			delete store.email
-			delete store.asaas_access_token
 			delete store.subscription_id
 			delete store.subscription_expires_at
 			delete store.subscription_status

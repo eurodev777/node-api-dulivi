@@ -24,7 +24,7 @@ const PLANS = {
 }
 
 //ROTA DE ASSINAR
-router.post('/api/subscriptions/subscribe', paymentLimiter, async (req, res) => {
+router.post('/api/subscriptions/', paymentLimiter, async (req, res) => {
 	try {
 		const {
 			fk_store_id,
@@ -175,7 +175,7 @@ router.get('/api/subscriptions/:fk_store_id/payments', paymentLimiter, async (re
 	}
 })
 // ALTERAR PLANO
-router.post('/api/subscriptions/:fk_store_id/change-plan', paymentLimiter, async (req, res) => {
+router.post('/api/subscriptions/:fk_store_id', paymentLimiter, async (req, res) => {
 	try {
 		const { fk_store_id } = req.params
 		const { new_plan_slug } = req.body
