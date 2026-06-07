@@ -14,7 +14,7 @@ const allowedOrigins = [
 	'http://localhost:8080',
 	'http://localhost:3000',
 	'http://localhost:5173',
-	'https://console-dulivi.vercel.app',
+	'https://dulivi-console.netlify.app',
 ]
 
 export const corsOptions = {
