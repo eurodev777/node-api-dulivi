@@ -1,5 +1,5 @@
 import express from 'express'
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI } from '@google/genai'
 import { GEMINI_API_KEY } from '../config/env.js'
 
 const router = express.Router()
@@ -7,233 +7,289 @@ const router = express.Router()
 const gemini_key = GEMINI_API_KEY
 
 const ai = new GoogleGenAI({
-  apiKey: gemini_key,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    },
-  },
-});
+	apiKey: gemini_key,
+	httpOptions: {
+		headers: {
+			'User-Agent': 'aistudio-build',
+		},
+	},
+})
 
 const STATE_UFS = [
-  'AC',
-  'AL',
-  'AP',
-  'AM',
-  'BA',
-  'CE',
-  'DF',
-  'ES',
-  'GO',
-  'MA',
-  'MT',
-  'MS',
-  'MG',
-  'PA',
-  'PB',
-  'PR',
-  'PE',
-  'PI',
-  'RJ',
-  'RN',
-  'RS',
-  'RO',
-  'RR',
-  'SC',
-  'SP',
-  'SE',
-  'TO',
-];
+	'AC',
+	'AL',
+	'AP',
+	'AM',
+	'BA',
+	'CE',
+	'DF',
+	'ES',
+	'GO',
+	'MA',
+	'MT',
+	'MS',
+	'MG',
+	'PA',
+	'PB',
+	'PR',
+	'PE',
+	'PI',
+	'RJ',
+	'RN',
+	'RS',
+	'RO',
+	'RR',
+	'SC',
+	'SP',
+	'SE',
+	'TO',
+]
 
 const METRICS = [
-  'Grande potencial para delivery e restaurantes.',
-  'Alta densidade populacional e consumo digital.',
-  'Cidade forte para pizzarias e hamburguerias.',
-  'Mercado gastronômico aquecido.',
-  'Alta demanda por pedidos online.',
-  'Forte presença de delivery no WhatsApp.',
-  'Cidade com crescimento comercial acelerado.',
-  'Excelente público para cardápio digital.',
-  'Região estratégica para prospecção.',
-  'Mercado local muito ativo para alimentação.',
-  'Cidade com forte vida noturna e consumo.',
-  'Público jovem e alto uso de delivery.',
-  'Alto crescimento de restaurantes locais.',
-  'Ótimo potencial para automação de pedidos.',
-  'Economia regional forte e público consumidor.',
-];
+	'Grande potencial para delivery e restaurantes.',
+	'Alta densidade populacional e consumo digital.',
+	'Cidade forte para pizzarias e hamburguerias.',
+	'Mercado gastronômico aquecido.',
+	'Alta demanda por pedidos online.',
+	'Forte presença de delivery no WhatsApp.',
+	'Cidade com crescimento comercial acelerado.',
+	'Excelente público para cardápio digital.',
+	'Região estratégica para prospecção.',
+	'Mercado local muito ativo para alimentação.',
+	'Cidade com forte vida noturna e consumo.',
+	'Público jovem e alto uso de delivery.',
+	'Alto crescimento de restaurantes locais.',
+	'Ótimo potencial para automação de pedidos.',
+	'Economia regional forte e público consumidor.',
+]
 
 router.post('/api/generate-leads', async (req, res) => {
-  try {
-    // escolhe UF aleatória
-    const randomUF =
-      STATE_UFS[Math.floor(Math.random() * STATE_UFS.length)];
+	try {
+		// escolhe UF aleatória
+		const randomUF = STATE_UFS[Math.floor(Math.random() * STATE_UFS.length)]
 
-    // busca dados do estado
-    const stateResponse = await fetch(
-      `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${randomUF}`
-    );
+		// busca dados do estado
+		const stateResponse = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${randomUF}`)
 
-    if (!stateResponse.ok) {
-      throw new Error('Erro ao buscar estado no IBGE');
-    }
+		if (!stateResponse.ok) {
+			throw new Error('Erro ao buscar estado no IBGE')
+		}
 
-    const stateData = await stateResponse.json();
+		const stateData = await stateResponse.json()
 
-    // busca municípios
-    const citiesResponse = await fetch(
-      `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${randomUF}/municipios`
-    );
+		// busca municípios
+		const citiesResponse = await fetch(
+			`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${randomUF}/municipios`,
+		)
 
-    if (!citiesResponse.ok) {
-      throw new Error('Erro ao buscar municípios no IBGE');
-    }
+		if (!citiesResponse.ok) {
+			throw new Error('Erro ao buscar municípios no IBGE')
+		}
 
-    const citiesData = await citiesResponse.json();
+		const citiesData = await citiesResponse.json()
 
-    // embaralha cidades
-    const shuffledCities = [...citiesData].sort(
-      () => Math.random() - 0.5
-    );
+		// embaralha cidades
+		const shuffledCities = [...citiesData].sort(() => Math.random() - 0.5)
 
-    // pega 20 cidades
-    const selectedCities = shuffledCities.slice(0, 20);
+		// pega 20 cidades
+		const selectedCities = shuffledCities.slice(0, 20)
 
-    // monta estrutura
-    const formattedCities = selectedCities.map((city) => ({
-      name: city.nome,
-      metric:
-        METRICS[Math.floor(Math.random() * METRICS.length)],
-    }));
+		// monta estrutura
+		const formattedCities = selectedCities.map((city) => ({
+			name: city.nome,
+			metric: METRICS[Math.floor(Math.random() * METRICS.length)],
+		}))
 
-    return res.json({
-      success: true,
-      data: {
-        state: stateData.nome,
-        uf: stateData.sigla,
-        cities: formattedCities,
-      },
-    });
-  } catch (error) {
-    console.error('Erro generate-leads:', error);
+		return res.json({
+			success: true,
+			data: {
+				state: stateData.nome,
+				uf: stateData.sigla,
+				cities: formattedCities,
+			},
+		})
+	} catch (error) {
+		console.error('Erro generate-leads:', error)
 
-    return res.status(500).json({
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Erro interno ao gerar leads.',
-    });
-  }
-});
+		return res.status(500).json({
+			success: false,
+			error: error instanceof Error ? error.message : 'Erro interno ao gerar leads.',
+		})
+	}
+})
 
 router.post('/api/generate-creative-prompts', async (req, res) => {
-  try {
-    const cuisineTypes = ['Burgers', 'Pizza', 'Sushi', 'General Delivery', 'Açai', 'Hot Dog', 'Marmitaria', 'Italian Food'];
-    const chosenCuisine = cuisineTypes[Math.floor(Math.random() * cuisineTypes.length)];
+	try {
+		const cuisineTypes = [
+			'Burgers',
+			'Pizza',
+			'Sushi',
+			'General Delivery',
+			'Açai',
+			'Hot Dog',
+			'Marmitaria',
+			'Italian Food',
+		]
+		const chosenCuisine = cuisineTypes[Math.floor(Math.random() * cuisineTypes.length)]
 
-    const userPrompt = `Gere uma especificação criativa PREMIUM de anúncio para o SaaS "Dulivi".
+		const userPrompt = `
+Você é um especialista em criação de anúncios para SaaS.
 
-    O produto oferece:
-    - Cardápio Digital
-    - Robô de WhatsApp
-    - Sistema de pedidos online
-    - Gestão para delivery
-    - TESTE GRÁTIS POR 15 DIAS (isso é o MAIS IMPORTANTE do anúncio)
-    
-    O foco desta arte deve ser no nicho de ${chosenCuisine} para delivery.
-    
-    REGRAS IMPORTANTES:
-    - O destaque PRINCIPAL da arte deve SEMPRE ser a oferta "15 DIAS GRÁTIS"
-    - O hook deve SEMPRE complementar essa oferta
-    - TODOS os hooks devem mencionar teste grátis, 15 dias grátis, grátis ou sem custo
-    - O badge deve ser extremamente curto, forte e chamativo
-    - O badge será usado visualmente em destaque grande na imagem
-    - O hook NÃO deve competir com o badge
-    - O estilo deve parecer anúncio moderno de startup SaaS premium
-    - O tom deve gerar urgência e desejo
-    - Evite hooks genéricos
-    
-    Quero receber:
-    - Um título moderno
-    - Um hook curto e persuasivo
-    - Um badge extremamente chamativo
-    - Cores modernas
-    - Um prompt em inglês para gerar fundo visual no Pollinations AI
-    
-    O prompt da imagem deve:
-    - pedir ilustração moderna food delivery
-    - estilo 3D ou minimalista
-    - iluminação neon
-    - fundo premium
-    - sem textos escritos
-    - muito espaço vazio para adicionar textos depois
-    - visual de anúncio profissional
-    - "no text", "no words", "typography free"
-    
-    Responda STRICTAMENTE em JSON:
-    
-    {
-      "title": "Título moderno",
-      "hook": "Copy curta mencionando teste grátis",
-      "badge": "15 DIAS GRÁTIS",
-      "accentColor": "#FF5A1F",
-      "bgGradientStart": "#0F172A",
-      "bgGradientEnd": "#1E293B",
-      "bgImagePrompt": "Prompt em inglês"
-    }`;
+Crie uma especificação criativa PREMIUM para o SaaS Dulivi.
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-lite',
-      contents: userPrompt,
-      config: {
-        responseMimeType: 'application/json',
-      }
-    });
+OBJETIVO:
 
-    const resultText = response.text?.trim() || "";
-    const parsed = JSON.parse(resultText);
-    res.json(parsed);
-  } catch (error) {
-    console.error('Error generating creative prompt:', error);
+Convencer donos de restaurantes, lanchonetes, pizzarias, hamburguerias e deliverys a criar gratuitamente seu Cardápio Digital.
 
-    // Graceful fallback if Gemini API is busy or has issues
-    const cuisineTypes = ['Burgers', 'Pizza', 'Sushi', 'Pastéis', 'Açai'];
-    const fallbackCuisine = cuisineTypes[Math.floor(Math.random() * cuisineTypes.length)];
+REGRAS OBRIGATÓRIAS:
 
-    const fallbacks = [
-      {
-        title: "Seu Delivery Mais Profissional",
-        hook: `Teste grátis por 15 dias e automatize seu delivery de ${fallbackCuisine}!`,
-        badge: "15 DIAS GRÁTIS",
-        accentColor: "#F97316",
-        bgGradientStart: "#0F172A",
-        bgGradientEnd: "#1E293B",
-        bgImagePrompt: `Premium gourmet ${fallbackCuisine} delivery scene, modern 3D food illustration, neon lighting, dark luxury background, food advertising aesthetic, empty copy space, ultra detailed, no text, no words, typography free`
-      },
-      {
-        title: "Venda Mais no WhatsApp",
-        hook: "Use grátis por 15 dias e receba pedidos automaticamente!",
-        badge: "TESTE GRÁTIS",
-        accentColor: "#22C55E",
-        bgGradientStart: "#052E16",
-        bgGradientEnd: "#14532D",
-        bgImagePrompt: "Modern smartphone food delivery interface, glowing whatsapp notifications, premium startup style, dark background, neon green lights, realistic 3D render, empty space for typography, no text"
-      },
-      {
-        title: "Cardápio Digital Inteligente",
-        hook: "15 dias grátis para transformar seu delivery hoje.",
-        badge: "SEM CUSTO",
-        accentColor: "#EAB308",
-        bgGradientStart: "#1E1B4B",
-        bgGradientEnd: "#312E81",
-        bgImagePrompt: "Luxury food delivery marketing illustration, premium burger and fries composition, cinematic neon lighting, modern SaaS advertising style, dark background, clean composition, no text, no typography"
-      }
-    ];
+- O título deve focar em criar um Cardápio Digital grátis.
+- O título deve ter no máximo 7 palavras.
+- O título deve ser extremamente chamativo.
+- O título deve parecer uma oferta irresistível.
+- O benefício principal é GRATUIDADE.
 
-    const selectedFallback = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-    res.json(selectedFallback);
-  }
-});
+NUNCA usar nos títulos:
+
+- WhatsApp
+- Automação
+- Gestão
+- Marketplace
+- Sistema
+
+Esses assuntos podem aparecer apenas no hook.
+
+BADGES PERMITIDOS:
+
+- CARDÁPIO GRÁTIS
+- CRIAR GRÁTIS
+- 100% GRÁTIS
+- SEM CUSTO
+- GRÁTIS HOJE
+- COMECE GRÁTIS
+
+EXEMPLOS DE TÍTULOS:
+
+- Crie Grátis Seu Cardápio Digital
+- Seu Cardápio Digital em Minutos
+- Monte Seu Cardápio Grátis Hoje
+- Comece Seu Cardápio Online Agora
+- Cardápio Digital Sem Custos
+- Seu Novo Cardápio Digital Grátis
+
+CORES:
+
+Utilize uma destas combinações modernas:
+
+1.
+accentColor: #1D84FF
+bgGradientStart: #FFFFFF
+bgGradientEnd: #EAF4FF
+
+2.
+accentColor: #FF6B00
+bgGradientStart: #1D84FF
+bgGradientEnd: #60A5FA
+
+3.
+accentColor: #7C3AED
+bgGradientStart: #EC4899
+bgGradientEnd: #8B5CF6
+
+4.
+accentColor: #06B6D4
+bgGradientStart: #FFFFFF
+bgGradientEnd: #CFFAFE
+
+5.
+accentColor: #F97316
+bgGradientStart: #FFF7ED
+bgGradientEnd: #FED7AA
+
+PROMPT DA IMAGEM:
+
+- Modern SaaS advertisement
+- Premium startup design
+- Food delivery business
+- Modern smartphone
+- 3D illustration
+- Bright colors
+- Clean composition
+- Large empty space for text
+- No text
+- No words
+- Typography free
+- Professional marketing visual
+
+RESPONDA APENAS EM JSON:
+
+{
+  "title": "",
+  "hook": "",
+  "badge": "",
+  "accentColor": "",
+  "bgGradientStart": "",
+  "bgGradientEnd": "",
+  "bgImagePrompt": ""
+}
+`
+
+		const response = await ai.models.generateContent({
+			model: 'gemini-2.0-flash-lite',
+			contents: userPrompt,
+			config: {
+				responseMimeType: 'application/json',
+			},
+		})
+
+		const resultText = response.text?.trim() || ''
+		const parsed = JSON.parse(resultText)
+		res.json(parsed)
+	} catch (error) {
+		console.error('Error generating creative prompt:', error)
+
+		// Graceful fallback if Gemini API is busy or has issues
+		const cuisineTypes = ['Burgers', 'Pizza', 'Sushi', 'Pastéis', 'Açai']
+		const fallbackCuisine = cuisineTypes[Math.floor(Math.random() * cuisineTypes.length)]
+
+		const fallbacks = [
+			{
+				title: 'Crie Grátis Seu Cardápio Digital',
+				hook: 'Receba pedidos pelo WhatsApp e venda mais.',
+				badge: 'CARDÁPIO GRÁTIS',
+				accentColor: '#1D84FF',
+				bgGradientStart: '#FFFFFF',
+				bgGradientEnd: '#EAF4FF',
+			},
+			{
+				title: 'Seu Cardápio Digital em Minutos',
+				hook: 'Compartilhe seu link e receba pedidos.',
+				badge: 'CRIAR GRÁTIS',
+				accentColor: '#FF6B00',
+				bgGradientStart: '#1D84FF',
+				bgGradientEnd: '#60A5FA',
+			},
+			{
+				title: 'Monte Seu Cardápio Grátis Hoje',
+				hook: 'Venda online sem pagar comissões.',
+				badge: '100% GRÁTIS',
+				accentColor: '#7C3AED',
+				bgGradientStart: '#EC4899',
+				bgGradientEnd: '#8B5CF6',
+			},
+			{
+				title: 'Comece Seu Cardápio Online',
+				hook: 'Seu delivery online em poucos minutos.',
+				badge: 'SEM CUSTO',
+				accentColor: '#06B6D4',
+				bgGradientStart: '#FFFFFF',
+				bgGradientEnd: '#CFFAFE',
+			},
+		]
+
+		const selectedFallback = fallbacks[Math.floor(Math.random() * fallbacks.length)]
+		res.json(selectedFallback)
+	}
+})
 
 export default router
