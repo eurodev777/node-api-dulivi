@@ -120,18 +120,6 @@ router.post('/api/generate-leads', async (req, res) => {
 
 router.post('/api/generate-creative-prompts', async (req, res) => {
 	try {
-		const cuisineTypes = [
-			'Burgers',
-			'Pizza',
-			'Sushi',
-			'General Delivery',
-			'Açai',
-			'Hot Dog',
-			'Marmitaria',
-			'Italian Food',
-		]
-		const chosenCuisine = cuisineTypes[Math.floor(Math.random() * cuisineTypes.length)]
-
 		const userPrompt = `
 Você é um especialista em criação de anúncios para SaaS.
 
@@ -247,10 +235,6 @@ RESPONDA APENAS EM JSON:
 		res.json(parsed)
 	} catch (error) {
 		console.error('Error generating creative prompt:', error)
-
-		// Graceful fallback if Gemini API is busy or has issues
-		const cuisineTypes = ['Burgers', 'Pizza', 'Sushi', 'Pastéis', 'Açai']
-		const fallbackCuisine = cuisineTypes[Math.floor(Math.random() * cuisineTypes.length)]
 
 		const fallbacks = [
 			{
