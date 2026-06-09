@@ -149,21 +149,16 @@ Esses assuntos podem aparecer apenas no hook.
 
 BADGES PERMITIDOS:
 
-- CARDÁPIO GRÁTIS
 - CRIAR GRÁTIS
-- 100% GRÁTIS
-- SEM CUSTO
-- GRÁTIS HOJE
 - COMECE GRÁTIS
+- TESTE GRÁTIS
 
 EXEMPLOS DE TÍTULOS:
 
 - Crie Grátis Seu Cardápio Digital
-- Seu Cardápio Digital em Minutos
 - Monte Seu Cardápio Grátis Hoje
-- Comece Seu Cardápio Online Agora
-- Cardápio Digital Sem Custos
-- Seu Novo Cardápio Digital Grátis
+- Criar Cardápio Digital Delivery Online Grátis
+- Cardápio Digital + Anúncios Online
 
 CORES:
 
@@ -193,21 +188,6 @@ bgGradientEnd: #CFFAFE
 accentColor: #F97316
 bgGradientStart: #FFF7ED
 bgGradientEnd: #FED7AA
-
-PROMPT DA IMAGEM:
-
-- Modern SaaS advertisement
-- Premium startup design
-- Food delivery business
-- Modern smartphone
-- 3D illustration
-- Bright colors
-- Clean composition
-- Large empty space for text
-- No text
-- No words
-- Typography free
-- Professional marketing visual
 
 RESPONDA APENAS EM JSON:
 
@@ -246,7 +226,7 @@ RESPONDA APENAS EM JSON:
 				bgGradientEnd: '#EAF4FF',
 			},
 			{
-				title: 'Seu Cardápio Digital em Minutos',
+				title: 'Criar Cardápio Digital Delivery Online Grátis',
 				hook: 'Compartilhe seu link e receba pedidos.',
 				badge: 'CRIAR GRÁTIS',
 				accentColor: '#FF6B00',
@@ -262,7 +242,7 @@ RESPONDA APENAS EM JSON:
 				bgGradientEnd: '#8B5CF6',
 			},
 			{
-				title: 'Comece Seu Cardápio Online',
+				title: 'Cardápio Digital + Anúncios Online',
 				hook: 'Seu delivery online em poucos minutos.',
 				badge: 'SEM CUSTO',
 				accentColor: '#06B6D4',
