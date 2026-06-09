@@ -120,139 +120,103 @@ router.post('/api/generate-leads', async (req, res) => {
 
 router.post('/api/generate-creative-prompts', async (req, res) => {
 	try {
-		const userPrompt = `
-Você é um especialista em criação de anúncios para SaaS.
+		const titles = [
+			'Crie Seu Cardápio Grátis',
+			'Cardápio Digital Grátis Hoje',
+			'Monte Seu Cardápio Grátis',
+			'Teste Grátis Por 15 Dias',
+			'15 Dias Grátis Para Delivery',
+			'Crie Seu Menu Digital Grátis',
+			'Comece Grátis Seu Cardápio',
+			'Cardápio Online Grátis Agora',
+			'Seu Delivery Grátis Por 15 Dias',
+			'Teste Grátis Seu Cardápio Digital',
+			'Cardápio Digital Sem Pagar Nada',
+			'Experimente Grátis Por 15 Dias',
+			'Crie Seu Delivery Grátis Hoje',
+			'Seu Cardápio Online Grátis',
+			'Ganhe 15 Dias Grátis',
+			'Teste Seu Cardápio Grátis',
+			'Cardápio Delivery Grátis Agora',
+			'Comece Seu Teste Grátis',
+			'Cardápio Digital Grátis Em Minutos',
+			'Crie Seu Menu Online Grátis',
+			'15 Dias Grátis Para Restaurantes',
+			'15 Dias Grátis Para Pizzarias',
+			'15 Dias Grátis Para Delivery',
+			'Cardápio Digital Teste Grátis',
+			'Comece Hoje Sem Pagar Nada',
+			'Seu Restaurante Grátis Online',
+			'Crie Seu Cardápio Sem Custos',
+			'Cardápio Digital Grátis Por 15 Dias',
+			'Teste Grátis E Venda Mais',
+			'Seu Menu Digital Grátis Hoje',
+		]
 
-Crie uma especificação criativa PREMIUM para o SaaS Dulivi.
+		const hooks = [
+			'Ganhe 15 dias grátis para testar sem compromisso.',
+			'Crie seu cardápio digital e teste gratuitamente.',
+			'Experimente todos os recursos por 15 dias.',
+			'Comece grátis e receba pedidos online.',
+			'Teste sem cartão de crédito.',
+			'Crie hoje e use grátis por 15 dias.',
+			'Seu delivery online em minutos.',
+			'Veja como vender mais sem pagar nada agora.',
+			'Teste a plataforma completa gratuitamente.',
+			'Cadastre seu cardápio e experimente grátis.',
+		]
 
-OBJETIVO:
+		const badges = ['CRIAR GRÁTIS', 'COMECE GRÁTIS', 'TESTE GRÁTIS']
 
-Convencer donos de restaurantes, lanchonetes, pizzarias, hamburguerias e deliverys a criar gratuitamente seu Cardápio Digital.
-
-REGRAS OBRIGATÓRIAS:
-
-- O título deve focar em criar um Cardápio Digital grátis.
-- O título deve ter no máximo 7 palavras.
-- O título deve ser extremamente chamativo.
-- O título deve parecer uma oferta irresistível.
-- O benefício principal é GRATUIDADE.
-
-NUNCA usar nos títulos:
-
-- WhatsApp
-- Automação
-- Gestão
-- Marketplace
-- Sistema
-
-Esses assuntos podem aparecer apenas no hook.
-
-BADGES PERMITIDOS:
-
-- CRIAR GRÁTIS
-- COMECE GRÁTIS
-- TESTE GRÁTIS
-
-EXEMPLOS DE TÍTULOS:
-
-- Crie Grátis Seu Cardápio Digital
-- Monte Seu Cardápio Grátis Hoje
-- Criar Cardápio Digital Delivery Online Grátis
-- Cardápio Digital + Anúncios Online
-
-CORES:
-
-Utilize uma destas combinações modernas:
-
-1.
-accentColor: #1D84FF
-bgGradientStart: #FFFFFF
-bgGradientEnd: #EAF4FF
-
-2.
-accentColor: #FF6B00
-bgGradientStart: #1D84FF
-bgGradientEnd: #60A5FA
-
-3.
-accentColor: #7C3AED
-bgGradientStart: #EC4899
-bgGradientEnd: #8B5CF6
-
-4.
-accentColor: #06B6D4
-bgGradientStart: #FFFFFF
-bgGradientEnd: #CFFAFE
-
-5.
-accentColor: #F97316
-bgGradientStart: #FFF7ED
-bgGradientEnd: #FED7AA
-
-RESPONDA APENAS EM JSON:
-
-{
-  "title": "",
-  "hook": "",
-  "badge": "",
-  "accentColor": "",
-  "bgGradientStart": "",
-  "bgGradientEnd": "",
-  "bgImagePrompt": ""
-}
-`
-
-		const response = await ai.models.generateContent({
-			model: 'gemini-2.0-flash-lite',
-			contents: userPrompt,
-			config: {
-				responseMimeType: 'application/json',
-			},
-		})
-
-		const resultText = response.text?.trim() || ''
-		const parsed = JSON.parse(resultText)
-		res.json(parsed)
-	} catch (error) {
-		console.error('Error generating creative prompt:', error)
-
-		const fallbacks = [
+		const colorSchemes = [
 			{
-				title: 'Crie Grátis Seu Cardápio Digital',
-				hook: 'Receba pedidos pelo WhatsApp e venda mais.',
-				badge: 'CARDÁPIO GRÁTIS',
 				accentColor: '#1D84FF',
 				bgGradientStart: '#FFFFFF',
 				bgGradientEnd: '#EAF4FF',
 			},
 			{
-				title: 'Criar Cardápio Digital Delivery Online Grátis',
-				hook: 'Compartilhe seu link e receba pedidos.',
-				badge: 'CRIAR GRÁTIS',
 				accentColor: '#FF6B00',
 				bgGradientStart: '#1D84FF',
 				bgGradientEnd: '#60A5FA',
 			},
 			{
-				title: 'Monte Seu Cardápio Grátis Hoje',
-				hook: 'Venda online sem pagar comissões.',
-				badge: '100% GRÁTIS',
 				accentColor: '#7C3AED',
 				bgGradientStart: '#EC4899',
 				bgGradientEnd: '#8B5CF6',
 			},
 			{
-				title: 'Cardápio Digital + Anúncios Online',
-				hook: 'Seu delivery online em poucos minutos.',
-				badge: 'SEM CUSTO',
 				accentColor: '#06B6D4',
 				bgGradientStart: '#FFFFFF',
 				bgGradientEnd: '#CFFAFE',
 			},
+			{
+				accentColor: '#F97316',
+				bgGradientStart: '#FFF7ED',
+				bgGradientEnd: '#FED7AA',
+			},
 		]
 
-		const selectedFallback = fallbacks[Math.floor(Math.random() * fallbacks.length)]
-		res.json(selectedFallback)
+		const random = (arr) => arr[Math.floor(Math.random() * arr.length)]
+
+		const color = random(colorSchemes)
+
+		const creative = {
+			title: random(titles),
+			hook: random(hooks),
+			badge: random(badges),
+
+			accentColor: color.accentColor,
+			bgGradientStart: color.bgGradientStart,
+			bgGradientEnd: color.bgGradientEnd,
+		}
+
+		res.json(creative)
+	} catch (error) {
+		console.error(error)
+
+		res.status(500).json({
+			error: 'Erro ao gerar criativo',
+		})
 	}
 })
 
