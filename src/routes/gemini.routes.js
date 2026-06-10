@@ -16,33 +16,17 @@ const ai = new GoogleGenAI({
 })
 
 const STATE_UFS = [
-	'AC',
-	'AL',
-	'AP',
-	'AM',
-	'BA',
-	'CE',
-	'DF',
-	'ES',
-	'GO',
-	'MA',
-	'MT',
-	'MS',
-	'MG',
-	'PA',
-	'PB',
-	'PR',
-	'PE',
-	'PI',
-	'RJ',
-	'RN',
-	'RS',
-	'RO',
-	'RR',
-	'SC',
-	'SP',
-	'SE',
-	'TO',
+	'SP', // São Paulo
+	'MG', // Minas Gerais
+	'RJ', // Rio de Janeiro
+	'PR', // Paraná
+	'SC', // Santa Catarina
+	'GO', // Goiás
+	'RS', // Rio Grande do Sul
+	'BA', // Bahia
+	'CE', // Ceará
+	'PE', // Pernambuco
+	'PA', // Pará
 ]
 
 const METRICS = [
