@@ -109,54 +109,43 @@ Você é um diretor de marketing especialista em SaaS para restaurantes.
 
 Crie um criativo para um sistema de restaurantes.
 
-O foco PRINCIPAL deve ser sempre:
-
+O foco PRINCIPAL do sistema é:
 1. Robô para WhatsApp
 2. Atendimento com IA
 3. Cardápio Digital
 4. Anúncios Facebook, Instagram e Google
 
-Retorne APENAS um JSON.
+Retorne APENAS um JSON válido.
 
 Formato:
-
 {
-  "title":"",
-  "hook":"",
-  "badge":"",
-  "imagePrompt":""
+  "title": "",
+  "hook": "",
+  "badge": "",
+  "imagePrompt": ""
 }
 
-Regras:
+REGRAS RÍGIDAS DE TEXTO (CURTO E DIRETO):
 
-O title deve ter até 38 caracteres.
+1. title: Máximo de 4 palavras. Deve ser direto e simples, focando na ferramenta ou no benefício principal.
+Exemplos do estilo que você DEVE seguir: 'Robô para WhatsApp', 'Atendimento com IA', 'Cardápio Digital Grátis', 'Delivery Automatizado', 'Restaurante Inteligente'.
 
-O hook até 70 caracteres.
+2. hook: Máximo de 1 frase curta. O foco OBRIGATÓRIO deve ser em teste grátis, facilidade e zero compromisso.
+Exemplos do estilo que você DEVE seguir: 'Ganhe 15 dias grátis para testar sem compromisso.', 'Crie seu cardápio digital e teste gratuitamente.', 'Teste sem cartão de crédito.', 'Seu delivery online em minutos.'
 
-badge:
-- IA
-- NOVIDADE
-- AUTOMAÇÃO
-- WHATSAPP
-- DELIVERY
+3. badge: Escolha APENAS UMA destas opções exatas: IA, WHATSAPP, ROBÔ IA, DELIVERY, CARDÁPIO, AUTOMAÇÃO, NOVO.
 
-O imagePrompt deve descrever uma imagem publicitária moderna, sem texto, contendo:
-
-- restaurante moderno
-- smartphone mostrando conversa WhatsApp
-- interface de cardápio digital
-- elementos de inteligência artificial
-- notificações de pedidos
-- estilo premium
-- iluminação cinematográfica
-- fundo azul (#1F84FF)
-- muito espaço negativo para adicionar textos
-- qualidade de propaganda profissional
-- sem marcas
-- sem logos
-- sem pessoas famosas
-- sem texto na imagem
+REGRAS DA IMAGEM (imagePrompt):
+Descreva uma imagem publicitária leve, focada na pessoa, sem texto, contendo:
+- Um jovem dono de restaurante brasileiro, com o visual e estilo atlético e carismático do Neymar Jr., usando uma camisa da seleção brasileira amarela com detalhes verdes e o escudo do Brasil.
+- Ele está em pé, no centro, em um campo de futebol de grama verde, sorrindo e segurando um smartphone moderno em uma das mãos, onde a tela exibe uma conversa de WhatsApp.
+- A iluminação é de dia ensolarado, natural e vibrante.
+- O fundo mostra o campo de futebol, a grama e o céu azul.
+- Qualidade de foto de smartphone premium.
+- Sem marcas e sem logos de terceiros.
+- Sem texto na imagem.
 `
+
 		const titles = [
 			'Robô para WhatsApp',
 			'Atendimento com IA',
@@ -181,21 +170,16 @@ O imagePrompt deve descrever uma imagem publicitária moderna, sem texto, conten
 		]
 
 		const hooks = [
-			'Atenda clientes automaticamente com Inteligência Artificial.',
-			'Receba pedidos pelo WhatsApp sem esforço.',
-			'Crie seu cardápio digital em poucos minutos.',
-			'Automatize seu restaurante com IA.',
-			'Venda mais usando WhatsApp e IA.',
-			'Atendimento 24 horas para seus clientes.',
-			'Anuncie no Google, Facebook e Instagram.',
-			'Cardápio digital completo para delivery.',
-			'Transforme seu WhatsApp em uma máquina de vendas.',
-			'Mais pedidos, menos trabalho manual.',
-			'Automação completa para restaurantes.',
-			'Seu atendente virtual nunca para.',
-			'Clientes fazem pedidos sozinhos.',
-			'IA que responde seus clientes instantaneamente.',
-			'Tudo que seu restaurante precisa em um só lugar.',
+			'Ganhe 15 dias grátis para testar sem compromisso.',
+			'Crie seu cardápio digital e teste gratuitamente.',
+			'Experimente todos os recursos por 15 dias.',
+			'Comece grátis e receba pedidos online.',
+			'Teste sem cartão de crédito.',
+			'Crie hoje e use grátis por 15 dias.',
+			'Seu delivery online em minutos.',
+			'Veja como vender mais sem pagar nada agora.',
+			'Teste a plataforma completa gratuitamente.',
+			'Cadastre seu cardápio e experimente grátis.',
 		]
 
 		const badges = ['IA', 'WHATSAPP', 'ROBÔ IA', 'DELIVERY', 'CARDÁPIO', 'AUTOMAÇÃO', 'NOVO']
