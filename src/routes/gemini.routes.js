@@ -247,7 +247,21 @@ O imagePrompt deve descrever uma imagem publicitária moderna, sem texto, conten
 			contents: prompt,
 		})
 
-		const creative = JSON.parse(response.text)
+		const text = response.text
+
+		console.log(text) // deixe isso enquanto testa
+
+		const jsonMatch = text.match(/\{[\s\S]*\}/)
+
+		if (!jsonMatch) {
+			throw new Error('Gemini não retornou um JSON válido.')
+		}
+
+		const creative = JSON.parse(jsonMatch[0])
+
+		creative.accentColor = color.accentColor
+		creative.bgGradientStart = color.bgGradientStart
+		creative.bgGradientEnd = color.bgGradientEnd
 
 		res.json(creative)
 	} catch (error) {
