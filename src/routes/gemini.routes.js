@@ -104,48 +104,6 @@ router.post('/api/generate-leads', async (req, res) => {
 
 router.post('/api/generate-creative-prompts', async (req, res) => {
 	try {
-		const prompt = `
-Você é um diretor de marketing especialista em SaaS para restaurantes.
-
-Crie um criativo para um sistema de restaurantes.
-
-O foco PRINCIPAL do sistema é:
-1. Robô para WhatsApp
-2. Atendimento com IA
-3. Cardápio Digital
-4. Anúncios Facebook, Instagram e Google
-
-Retorne APENAS um JSON válido.
-
-Formato:
-{
-  "title": "",
-  "hook": "",
-  "badge": "",
-  "imagePrompt": ""
-}
-
-REGRAS RÍGIDAS DE TEXTO (CURTO E DIRETO):
-
-1. title: Máximo de 4 palavras. Deve ser direto e simples, focando na ferramenta ou no benefício principal.
-Exemplos do estilo que você DEVE seguir: 'Robô para WhatsApp', 'Atendimento com IA', 'Cardápio Digital Grátis', 'Delivery Automatizado', 'Restaurante Inteligente'.
-
-2. hook: Máximo de 1 frase curta. O foco OBRIGATÓRIO deve ser em teste grátis, facilidade e zero compromisso.
-Exemplos do estilo que você DEVE seguir: 'Ganhe 15 dias grátis para testar sem compromisso.', 'Crie seu cardápio digital e teste gratuitamente.', 'Teste sem cartão de crédito.', 'Seu delivery online em minutos.'
-
-3. badge: Escolha APENAS UMA destas opções exatas: IA, WHATSAPP, ROBÔ IA, DELIVERY, CARDÁPIO, AUTOMAÇÃO, NOVO.
-
-REGRAS DA IMAGEM (imagePrompt):
-Descreva uma imagem publicitária leve, focada na pessoa, sem texto, contendo:
-- Um jovem dono de restaurante brasileiro, com o visual e estilo atlético e carismático do Neymar Jr., usando uma camisa da seleção brasileira amarela com detalhes verdes e o escudo do Brasil.
-- Ele está em pé, no centro, em um campo de futebol de grama verde, sorrindo e segurando um smartphone moderno em uma das mãos, onde a tela exibe uma conversa de WhatsApp.
-- A iluminação é de dia ensolarado, natural e vibrante.
-- O fundo mostra o campo de futebol, a grama e o céu azul.
-- Qualidade de foto de smartphone premium.
-- Sem marcas e sem logos de terceiros.
-- Sem texto na imagem.
-`
-
 		const titles = [
 			'Robô para WhatsApp',
 			'Atendimento com IA',
@@ -216,36 +174,15 @@ Descreva uma imagem publicitária leve, focada na pessoa, sem texto, contendo:
 
 		const color = random(colorSchemes)
 
-		// const creative = {
-		// 	title: random(titles),
-		// 	hook: random(hooks),
-		// 	badge: random(badges),
+		const creative = {
+			title: random(titles),
+			hook: random(hooks),
+			badge: random(badges),
 
-		// 	accentColor: color.accentColor,
-		// 	bgGradientStart: color.bgGradientStart,
-		// 	bgGradientEnd: color.bgGradientEnd,
-		// }
-
-		const response = await ai.models.generateContent({
-			model: 'gemini-2.5-flash',
-			contents: prompt,
-		})
-
-		const text = response.text
-
-		console.log(text) // deixe isso enquanto testa
-
-		const jsonMatch = text.match(/\{[\s\S]*\}/)
-
-		if (!jsonMatch) {
-			throw new Error('Gemini não retornou um JSON válido.')
+			accentColor: color.accentColor,
+			bgGradientStart: color.bgGradientStart,
+			bgGradientEnd: color.bgGradientEnd,
 		}
-
-		const creative = JSON.parse(jsonMatch[0])
-
-		creative.accentColor = color.accentColor
-		creative.bgGradientStart = color.bgGradientStart
-		creative.bgGradientEnd = color.bgGradientEnd
 
 		res.json(creative)
 	} catch (error) {
