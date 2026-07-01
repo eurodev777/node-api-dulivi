@@ -228,6 +228,8 @@ class OrderController {
 				customer_whatsapp: customerWhatsapp,
 				total_amount: order.total_amount,
 				delivery_fee: order.delivery_fee,
+				delivery_time_min: order.delivery_time_min,
+				delivery_time_max: order.delivery_time_max,
 				delivery_method: order.delivery_method,
 				delivery_address: order.delivery_address,
 				is_scheduled: order?.is_scheduled,
