@@ -26,22 +26,34 @@ export const calculateTotalOrderValue = async ({ items, fk_store_delivery_areas_
 	}
 	// Calcular frete
 	let shipping = 0
+	let delivery_time_min = 0
+	let delivery_time_max = 0
 
 	const deliveryAreaId = parseInt(fk_store_delivery_areas_id)
 
 	if (delivery_method === 'entrega') {
 		const area = deliveryAreaId > 0 ? await deliveryAreaRepository.getById(deliveryAreaId) : null
+		
 		if (area && area.delivery_fee != null) {
 			shipping = Number(area.delivery_fee)
+			delivery_time_min = Number(area.delivery_time_min || 0)
+			delivery_time_max = Number(area.delivery_time_max || 0)
 		} else {
 			const store = await storeRepository.getById(fk_store_id)
+
 			shipping = store && store.default_delivery_fee != null ? Number(store.default_delivery_fee) : 0
+
+			// Caso a loja possua tempo padrão
+			delivery_time_min = Number(store?.delivery_time_min || 0)
+			delivery_time_max = Number(store?.delivery_time_max || 0)
 		}
 
 		shipping = round(shipping)
 
 		return {
 			shipping,
+			delivery_time_min,
+			delivery_time_max,
 			calculatedTotal: round(subtotal + shipping)
 		}
 	}
@@ -50,6 +62,8 @@ export const calculateTotalOrderValue = async ({ items, fk_store_delivery_areas_
 
 	return {
 		shipping,
+		delivery_time_min,
+		delivery_time_max,
 		calculatedTotal: round(subtotal + shipping)
 	}
 

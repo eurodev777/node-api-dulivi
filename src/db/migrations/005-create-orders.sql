@@ -2,6 +2,8 @@ CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     total_amount NUMERIC NOT NULL,
     delivery_fee NUMERIC,
+    delivery_time_min INTEGER NOT NULL,
+    delivery_time_max INTEGER NOT NULL,
     delivery_method TEXT NOT NULL DEFAULT 'entrega', -- entrega | retirada | no_local
     is_scheduled TEXT DEFAULT 'false',
     scheduled_for DATETIME,

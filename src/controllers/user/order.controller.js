@@ -344,12 +344,13 @@ class OrderController {
 		try {
 			// Validar preço total do pedido
 			let totalAdjusted = false
-			const { shipping, calculatedTotal } = await calculateTotalOrderValue({
-				items,
-				delivery_method,
-				fk_store_delivery_areas_id,
-				fk_store_id,
-			})
+			const { shipping, calculatedTotal, delivery_time_min,
+				delivery_time_max } = await calculateTotalOrderValue({
+					items,
+					delivery_method,
+					fk_store_delivery_areas_id,
+					fk_store_id,
+				})
 
 			if (Math.abs(Number(total_amount) - calculatedTotal) > 0.01) {
 				const userInfo = fk_user_id ? `user_id=${fk_user_id}` : `user=${customer_name}`
@@ -391,6 +392,8 @@ class OrderController {
 			const payload = {
 				total_amount: Number(total_amount),
 				delivery_fee: Number(shipping),
+				delivery_time_min,
+				delivery_time_max,
 				delivery_method,
 				is_scheduled,
 				scheduled_for,
