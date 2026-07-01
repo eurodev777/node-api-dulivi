@@ -8,6 +8,8 @@ class OrderRepository {
 		const {
 			total_amount,
 			delivery_fee,
+			delivery_time_min,
+			delivery_time_max,
 			delivery_method,
 			is_scheduled,
 			scheduled_for,
@@ -34,6 +36,8 @@ class OrderRepository {
 				`INSERT INTO orders (
 				total_amount,
 				delivery_fee,
+				delivery_time_min,
+				delivery_time_max,
 				delivery_method,
 				is_scheduled,
 				scheduled_for,
@@ -54,11 +58,13 @@ class OrderRepository {
 				fk_user_id,
 				fk_store_id
 			)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			RETURNING *`,
 				[
 					Number(total_amount),
 					Number(delivery_fee ?? 7),
+					Number(delivery_time_min),
+					Number(delivery_time_max),
 					String(delivery_method),
 					Number(is_scheduled ?? 0),
 					scheduled_for ?? null,
