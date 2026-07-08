@@ -24,17 +24,17 @@ const PLANS = {
 
 	dulivi_plan_start_annual: {
 		name: 'dulivi_plan_start_annual',
-		price: 65,
+		price: 720,
 	},
 
 	dulivi_plan_pro_annual: {
 		name: 'dulivi_plan_pro_annual',
-		price: 111.92,
+		price: 1343.04,
 	},
 
 	dulivi_plan_turbo_annual: {
 		name: 'dulivi_plan_turbo_annual',
-		price: 199.92,
+		price: 2399.04,
 	},
 }
 
