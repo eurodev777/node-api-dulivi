@@ -9,7 +9,7 @@ const turso = getTursoClient()
 const PLANS = {
 	dulivi_plan_start: {
 		name: 'dulivi_plan_start',
-		price: 89.9,
+		price: 75,
 	},
 
 	dulivi_plan_pro: {
@@ -20,6 +20,21 @@ const PLANS = {
 	dulivi_plan_turbo: {
 		name: 'dulivi_plan_turbo',
 		price: 249.9,
+	},
+
+	dulivi_plan_start_annual: {
+		name: 'dulivi_plan_start_annual',
+		price: 65,
+	},
+
+	dulivi_plan_pro_annual: {
+		name: 'dulivi_plan_pro_annual',
+		price: 111.92,
+	},
+
+	dulivi_plan_turbo_annual: {
+		name: 'dulivi_plan_turbo_annual',
+		price: 199.92,
 	},
 }
 
