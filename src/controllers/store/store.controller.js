@@ -386,6 +386,36 @@ class StoreController {
 			return res.status(500).json({ error: 'Erro ao verificar status do Asaas' })
 		}
 	}
+	// Senha
+	async checkPassword(req, res) {
+		try {
+			const { id } = req.params
+			const { password } = req.body
+
+			const store = await storeRepository.findById(id)
+
+			if (!store) {
+				return res.status(404).json({
+					success: false,
+					message: 'Cliente não encontrado',
+				})
+			}
+
+			const passwordMatches = await bcrypt.compare(password, store.password)
+
+			return res.status(200).json({
+				success: true,
+				passwordMatches,
+			})
+		} catch (error) {
+			console.error(error)
+
+			return res.status(500).json({
+				success: false,
+				message: 'Erro ao verificar senha',
+			})
+		}
+	}
 }
 
 export default new StoreController()

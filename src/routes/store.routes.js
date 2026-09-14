@@ -13,5 +13,6 @@ router.put('/api/store/update/:id', authToken, storeController.update)
 router.get('/api/store/public/:slug', authLimiter, storeController.getPublicBySlug)
 router.get('/api/store/status/:fk_store_id', storeController.getStoreStatus)
 router.get('/api/store/check-mercadopago/:fk_store_id', authToken, storeController.checkMercadoPagoStatus)
+router.post('/api/store/:id/verificar-senha', authToken, storeController.checkPassword)
 
 export default router
