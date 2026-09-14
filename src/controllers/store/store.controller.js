@@ -386,13 +386,12 @@ class StoreController {
 			return res.status(500).json({ error: 'Erro ao verificar status do Asaas' })
 		}
 	}
-	// Senha
-	async checkPassword(req, res) {
+	// Acessar painel da loja pelo ID - ADMIN/SUPORTE
+	async loginAsStore(req, res) {
 		try {
 			const { id } = req.params
-			const { password } = req.body
 
-			const store = await storeRepository.findById(id)
+			const store = await storeRepository.getById(id)
 
 			if (!store) {
 				return res.status(404).json({
@@ -401,18 +400,33 @@ class StoreController {
 				})
 			}
 
-			const passwordMatches = await bcrypt.compare(password, store.password)
+			const token = jwt.sign(
+				{
+					id: store.id,
+					email: store.email,
+				},
+				SECRET,
+				{
+					expiresIn: '30d',
+				},
+			)
 
 			return res.status(200).json({
 				success: true,
-				passwordMatches,
+				message: 'Acesso liberado com sucesso',
+				data: {
+					id: store.id,
+					name: store.name,
+					email: store.email,
+					token,
+				},
 			})
 		} catch (error) {
-			console.error(error)
+			console.error('Erro ao acessar loja:', error)
 
 			return res.status(500).json({
 				success: false,
-				message: 'Erro ao verificar senha',
+				message: 'Erro ao acessar loja',
 			})
 		}
 	}
