@@ -1,57 +1,81 @@
-// src/controllers/UploadController.js
+
 import multer from 'multer'
 import sharp from 'sharp'
 import { v4 as uuidv4 } from 'uuid'
 
 import supabase from '../lib/supabase.js'
 
-const upload = multer({ storage: multer.memoryStorage() })
+const upload = multer({
+  storage: multer.memoryStorage()
+})
 
-// Middleware para o multer (vai ser usado na rota)
+// Mantém o mesmo middleware
 export const multerMiddleware = upload.single('imagem')
 
-// Função controller que faz o upload para o Supabase
+// Mantém a mesma função de upload
 export const uploadImage = async (req, res) => {
-	try {
-		const { buffer, mimetype } = req.file
+  try {
+    if (!req.file) {
+      return res.status(400).send('Nenhuma imagem enviada.')
+    }
 
-		// Gera um nome único para o arquivo com base na data atual e UUID
-		const timestamp = new Date().toISOString().replace(/[-:T.]/g, '')
-		const uniqueId = uuidv4()
+    const { buffer, mimetype } = req.file
 
-		// Defina a extensão desejada (por exemplo, .webp)
-		const desiredExtension = '.webp'
+    // Gera nome único
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[-:T.]/g, '')
 
-		// Se o arquivo não for WebP, converta
-		let convertedBuffer = buffer
-		let fileExtension = desiredExtension
+    const uniqueId = uuidv4()
+    const newFileName = `${timestamp}_${uniqueId}.webp`
 
-		if (mimetype !== 'image/webp') {
-			// Converte a imagem para WebP
-			convertedBuffer = await sharp(buffer)
-				.toFormat('webp')
-				.webp({ quality: 70 }) // Aqui você pode ajustar a qualidade da conversão
-				.toBuffer()
-		}
+    // Converte para WebP quando necessário
+    let convertedBuffer = buffer
 
-		const newFileName = `${timestamp}_${uniqueId}${fileExtension}`
+    if (mimetype !== 'image/webp') {
+      convertedBuffer = await sharp(buffer)
+        .webp({ quality: 70 })
+        .toBuffer()
+    }
 
-		const { data, error } = await supabase.storage
-			.from('dulivi')
-			.upload(`cardapio/${newFileName}`, convertedBuffer, {
-				contentType: 'image/webp', // Defina o tipo como WebP
-			})
+    // Bucket e pasta corretos do Supabase
+    const bucket = 'images'
+    const filePath = `pizzas/${newFileName}`
 
-		if (error) {
-			console.error(error)
-			return res.status(500).send(error.message)
-		}
+    // Envia a imagem
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(filePath, convertedBuffer, {
+        contentType: 'image/webp',
+        cacheControl: '3600',
+        upsert: false
+      })
 
-		const url = supabase.storage.from('dulivi').getPublicUrl(`cardapio/${newFileName}`).data.publicUrl
+    if (error) {
+      console.error('ERRO UPLOAD SUPABASE:', {
+        message: error.message,
+        code: error.code,
+        statusCode: error.statusCode
+      })
 
-		res.send({ url })
-	} catch (error) {
-		console.error(error)
-		res.status(500).send('Erro ao fazer upload da imagem.')
-	}
+      return res.status(500).send(error.message)
+    }
+
+    // Gera URL pública no bucket correto
+    const { data } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(filePath)
+
+    const url = data.publicUrl
+
+    // MESMA RESPOSTA QUE SEU FRONTEND JÁ UTILIZA
+    return res.send({ url })
+
+  } catch (error) {
+    console.error('ERRO AO FAZER UPLOAD:', error)
+
+    return res.status(500).send(
+      'Erro ao fazer upload da imagem.'
+    )
+  }
 }

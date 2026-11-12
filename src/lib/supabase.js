@@ -1,8 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_API_KEY } from '../config/env.js'
 
-const api_key = SUPABASE_API_KEY //process.env.SUPABASE_API_KEY
+const supabaseUrl = 'https://wkgmcltiodqnwskfrkls.supabase.co'
 
-const supabase = createClient('https://wkgmcltiodqnwskfrkls.supabase.co', api_key)
+const supabase = createClient(supabaseUrl, SUPABASE_API_KEY, {
+	auth: {
+		autoRefreshToken: false,
+		persistSession: false,
+		detectSessionInUrl: false,
+	},
+})
 
 export default supabase
